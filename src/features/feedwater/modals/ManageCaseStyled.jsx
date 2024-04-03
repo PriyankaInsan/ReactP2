@@ -100,6 +100,17 @@ const ManageCaseStyled = styled(Modal)`
             padding: 10px 32px;
         }
     }
+    .draggabel{
+        cursor: move; /* fallback if grab cursor is unsupported */
+        cursor: grab;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+    }
+    .draggabel:active {
+        cursor: grabbing;
+        cursor: -moz-grabbing;
+        cursor: -webkit-grabbing;
+    }
     .case-name{
         padding:12px 10px;
         display: flex;

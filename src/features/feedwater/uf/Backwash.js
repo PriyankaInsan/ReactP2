@@ -40,7 +40,7 @@ const Backwash = () => {
     bwWaterSource,
     forwardFlushWaterSource,
     bwProtocol,
-    oxidantChemicals,
+    
     ufInputRangeConfig,
   } = UFStore;
 
@@ -50,6 +50,10 @@ const Backwash = () => {
   );
   const unit = useSelector(
     (state) => state.projectInfo?.projectConfig?.unitConfig
+  );
+  
+  const {  chemicalType } = useSelector(
+    (state) => state.UFStore.cipDropdownData
   );
   const tempDesign =
     (feedWater_StreamStore &&
@@ -113,10 +117,10 @@ const Backwash = () => {
     setIsFocused(null);
     let valueIsSafe = false;
     if (e.target.name === "oxidantDosage") {
-      if (e.target.value < 0 || e.target.value > 20 || isNaN(e.target.value)) {
+      if (e.target.value < fieldOxidantDosage?.minValue || e.target.value > fieldOxidantDosage?.maxValue || isNaN(e.target.value)) {
         //Show Error PopUp
         setIsFieldValid(true);
-        const msg = `The Oxidant value entered is outside the allowed range (${0} to ${20}). Please revise your input.`;
+        const msg = `The Oxidant value entered is outside the allowed range (${fieldOxidantDosage?.minValue} to ${fieldOxidantDosage?.maxValue}). Please revise your input.`;
         setMessage(msg);
         setIsFocused("oxidantDosage");
         setTimeout(() => {
@@ -260,7 +264,7 @@ const Backwash = () => {
         updateUFStore({
           ...UFData,
           ["bWDesignTemperature_Ind"]: checked,
-          oxidantID: oxidantChemicals[0].id.toString(),
+          oxidantID: chemicalType.oxidant[0].id.toString(),
           oxidantDosage: fieldOxidantDosage.defaultValue,
         })
       );
@@ -433,7 +437,7 @@ const Backwash = () => {
       /*  bulkConcentration: 12, displayName: "NaOCl(12)", id: 12, name: "Oxidant" */
     }
     const { value, name, id } = e.target;
-    let chemData = oxidantChemicals.find((chem) => chem.id == value);
+    let chemData = chemicalType.oxidant.find((chem) => chem.id == value);
     let concentration = value == 0 ? 0 : chemData.bulkConcentration;
     let displayName = value == 0 ? 0 : chemData.displayName;
     dispatch(updateUFStore({ ...UFData, ["oxidantID"]: value.toString() }));
@@ -674,7 +678,7 @@ const Backwash = () => {
                   {!UFData.bWDesignTemperature_Ind && (
                     <option value={0}></option>
                   )}
-                  {oxidantChemicals?.map((oxdt, index) => (
+                  {chemicalType.oxidant?.map((oxdt, index) => (
                     <option value={oxdt.id} key={`oxidant-${index}`}>
                       {oxdt.displayName}
                     </option>

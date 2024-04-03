@@ -586,20 +586,26 @@ export const UFSlice = createSlice({
       state.cipDropdownData.chemicalType = tempData;
     },
     calculateUFFields: (state, action) => {
+      // console.log("$$$$$$$$$$ 1 calculateUFFields called : START");
       let TOTAL_UNITS;
+      var online_Trains = state.data.onlineTrains.length == 0 ? 0 : state.data.onlineTrains;
+      var redundantStandby_Trains = state.data.redundantStandbyTrains.length == 0 ? 0 : state.data.redundantStandbyTrains;
+      var redundant_Trains = state.data.redundantTrains.length == 0 ? 0 : state.data.redundantTrains;
+      var skidsPer_Trains = state.data.skidsPerTrain.length == 0 ? 0 : state.data.skidsPerTrain;
+      var modulesPer_Skid = state.data.modulesPerSkid.length == 0 ? 0 : state.data.modulesPerSkid;
 
       if (state.data.uFBWCEBStandbyOptionID == 1) {
         TOTAL_UNITS = Math.round(
-          parseInt(state.data.onlineTrains) +
-            parseInt(state.data.redundantTrains),
+          parseInt(online_Trains) +
+            parseInt(redundant_Trains),
           2
         );
         state.data.uFStorageTankOptionID = 2; ////Backwash + Filtrate
       } else if (state.data.uFBWCEBStandbyOptionID == 2) {
         TOTAL_UNITS = Math.round(
-          parseInt(state.data.onlineTrains) +
-            parseInt(state.data.redundantStandbyTrains) +
-            parseInt(state.data.redundantTrains),
+          parseInt(online_Trains) +
+          parseInt(redundantStandby_Trains) +
+          parseInt(redundant_Trains),
           2
         );
         state.data.uFStorageTankOptionID = 1; //Backwash Only
@@ -607,12 +613,12 @@ export const UFSlice = createSlice({
       if (state.activeUFModule?.integraPacInd == true) {
         //field is disabled,Track Design Section is made visible
         const TOTAL_NUM_RACKS = Math.round(
-          parseInt(TOTAL_UNITS) * parseInt(state.data.skidsPerTrain),
+          parseInt(TOTAL_UNITS) * parseInt(skidsPer_Trains),
           2
         );
         const MODULES_PER_UNIT = Math.round(
-          parseInt(state.data.skidsPerTrain) *
-            parseInt(state.data.modulesPerSkid),
+          parseInt(skidsPer_Trains) *
+            parseInt(modulesPer_Skid),
           2
         );
         const TOTAL_MODULES = Math.round(
@@ -623,6 +629,17 @@ export const UFSlice = createSlice({
         state.data.totalTrains = TOTAL_UNITS;
         state.data.modulesPerTrain = MODULES_PER_UNIT;
         state.data.totalModules = TOTAL_MODULES;
+
+        // console.log("FLAG is TRUE");
+        // console.log("Rack/Unit",state.data.skidsPerTrain);
+        // console.log("Modules/Rack",state.data.modulesPerSkid);
+        // console.log("Total Number of Racks",state.data.skids);
+        // console.log("Online Trains",state.data.onlineTrains);
+        // console.log("StandBy Trains",state.data.redundantStandbyTrains);
+        // console.log("Redudant Trains",state.data.redundantTrains);
+        // console.log("Modules/Train : computed",state.data.modulesPerTrain);
+        // console.log("totalModules : comuted",state.data.totalModules);
+
       } else {
         //field is enabled,Track Design Section is hidden
         state.data.skidsPerTrain = "1"; //Rack/Unit
@@ -642,7 +659,11 @@ export const UFSlice = createSlice({
         state.data.skids = TOTAL_NUM_RACKS;
         state.data.totalTrains = TOTAL_UNITS;
         state.data.totalModules = TOTAL_MODULES;
+
+        // console.log("FLAG is FALSE");
+        // console.log("totalModules : ",TOTAL_MODULES);
       }
+      // console.log("$$$$$$$$$$ calculateUFFields called : END");
     },
     updateWaterSubtypeFlag: (state, action) => {
       state.waterSubTypeFlag = action.payload;

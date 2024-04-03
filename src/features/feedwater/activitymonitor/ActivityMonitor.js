@@ -68,7 +68,10 @@ import { colors } from "../../../common/styles/Theme";
 import GlobalUnitConversion from "../../../common/utils/GlobalUnitConversion";
 import { updateTabAvailable } from "../../../common/ReportIXDSlice";
 
-import { updateTabAvailableForUF,UpdateUFReport } from "../../../common/ReportUFSlice";
+import {
+  updateTabAvailableForUF,
+  UpdateUFReport,
+} from "../../../common/ReportUFSlice";
 
 const ActivityMonitor = ({ setCurrentPanel }) => {
   const dispatch = useDispatch();
@@ -85,9 +88,10 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
   const { chemicalConfig, pumpCofig, unitConfig, currencyConfig } = useSelector(
     (state) => state.projectInfo.projectConfig
   );
-  const { projectInfoVM, appInfoVM } = useSelector(
+  const { projectInfoVM, appInfoVM, } = useSelector(
     (state) => state.projectInfo.projectData
   );
+  const{countryData} = useSelector( (state) => state.projectInfo);
   const { errorMsgCode } = useSelector((state) => state.scrollData);
 
   //Project Data list ---------------------------------------------------------------------------------------
@@ -105,7 +109,9 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
   const FeedStreamData = useSelector(
     (state) => state.Feedsetupdetailsdatapanel.streamData
   );
-  const { technologyAdded } = useSelector((state) => state.processDiagramSlice);
+  const { technologyAdded, isLoading } = useSelector(
+    (state) => state.processDiagramSlice
+  );
 
   //UF store data -------------------------------------------------------------------------------------------
   const UFStore = useSelector((state) => state.UFStore);
@@ -122,8 +128,13 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
   } = UFStore;
 
   //UF ReportUFslice
-  const DefaultUFstroe = useSelector((state) => state.ReportUF.data);
-  const tabAvailableForUF = useSelector((state) => state.ReportUF.tabAvailableForUF);
+  const DefaultUFstore = useSelector((state) => state.ReportUF.data);
+  const tabAvailableForUF = useSelector(
+    (state) => state.ReportUF.tabAvailableForUF
+  );
+  const ufReportLoading = useSelector(
+    (state) => state.ReportUF.ufReportLoading
+  );
 
   //Process diagram Data--------------------------------------------------------------------------------------
   const {
@@ -185,7 +196,7 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
     listProductQualityandregeneration,
   } = useSelector((state) => state.IXStore.data);
   const resinVal = useSelector((state) => state.IXStore.data?.listRegenConds);
-  const uomData = useSelector((state)=>state.GUnitConversion.data);
+  const uomData = useSelector((state) => state.GUnitConversion.data);
   const ixStoreAdvance = useSelector(
     (state) => state.IXStore?.data?.listAdvRegen
   );
@@ -219,6 +230,8 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
   const {
     existingPlantDescription,
     evaluateExistFlag,
+    modeling,
+    viewReport,
     resinNameCalc,
     resinInertCalc,
     resinIonicCalc,
@@ -255,9 +268,8 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
     (state) => state.projectInfo?.projectConfig?.unitConfig
   );
 
-  const tabAvailable= useSelector((state)=>state.ReportIXD.tabAvailable);
-  const reportData= useSelector((state)=>state.ReportIXD.data);
-
+  const tabAvailable = useSelector((state) => state.ReportIXD.tabAvailable);
+  const reportData = useSelector((state) => state.ReportIXD.data);
 
   //css variabels
   const [scrollCheck, setScrollCheck] = useState(false);
@@ -319,9 +331,16 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
       dispatch(setReportLoader());
     }
     if (IXDReportResponse.isSuccess) {
+    let calcChemDose = 
+         GlobalUnitConversion(
+          GlobalUnitConversionStore,
+          IXDReportResponse.data?.calcChemDose,
+          "g/L",
+          unit.selectedUnits[14] );
       dispatch(setReportData(IXDReportResponse.data?.byteArray));
       dispatch(
-        updateAfterReportChemDoseData(IXDReportResponse.data?.calcChemDose)
+        //updateAfterReportChemDoseData(IXDReportResponse.data?.calcChemDose)
+        updateAfterReportChemDoseData(calcChemDose)
       );
       dispatch(
         updateAfterReportOverRunDoseData(IXDReportResponse.data?.calcOverrun)
@@ -632,7 +651,7 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
     let selectedUnitbyUser = userSelectedMetric();
     let water = waterBlockFlag();
     let fastRinseWater = fastRinseIXDReport();
-    console.log("fastRinseWater",fastRinseWater);
+    console.log("fastRinseWater", fastRinseWater);
 
     console.log("plantDesignInd", plantDesignInd);
     //-------calculation for product quality page starts----//
@@ -759,565 +778,592 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
     }
 
     /*----Unit conversion for Product Quality Regeneration end-----*/
-    const MAIN_INPUT = tabAvailable.IXD?{
-      Export_to_Excel: 0,
-      Name_1: "", //It will be updated by middleware before sending to Calc-engine
-      Name_2: "", //It will be updated by middleware before sending to Calc-engine
-      Name_3: "", //It will be updated by middleware before sending to Calc-engine
-      Name_4: "", //It will be updated by middleware before sending to Calc-engine
-      Name_Inert1: "", //It will be updated by middleware before sending to Calc-engine
-      Name_Inert2: "", //It will be updated by middleware before sending to Calc-engine
-      Name_Inert3: "", //It will be updated by middleware before sending to Calc-engine
-      Flag_Evaluate_Type: true,
-      Flag_Degas: degasifation_ind !== null && degasifation_ind,
-      Flag_Custom_Resin_Volume_1: false,
-      Flag_Vessel_1_Custom: false,
-      Flag_Custom_Inert_Height: false,
-      Flag_Overrun_Computation:
-        listProductQualityandregeneration[0]?.overAllComputation == 1
-          ? true
-          : false,
-      Flag_neutral_Effluent:
-        listProductQualityandregeneration[0]?.naturalEffect === 2 && true,
-      Flag_Optimise_Dose:
-        listProductQualityandregeneration[0]?.doseOptimization === 2 &&
-        true,
-      Flag_Overall_Process: 7, //needs to be dynamic when more technology(currently we are using only demineralization)
-      Flag_CP_Sub_Process: 0, //IXCPP
-      Flag_Layout:
-        parseFloat(trains_StandBy) > 0 && trains_StandBy !== null
-          ? 2
-          : no_Buffer_Tank_ind === true
-          ? 0
-          : 1,
-      Bypass_Fraction: bypassed !== null ? parseFloat(bypassed) : 0,
-      N_trains_online:
-        trains_Online !== null ? parseFloat(trains_Online) : 0,
-      N_trains_Standby:
-        trains_StandBy !== null ? parseFloat(trains_StandBy) : 0,
-      Flag_Evaluation_Mode: plantDesignInd,
-      Flag_Design_Criteria:
-        evaluateExisiting_ind_RuntimeOptimized === true ? 1 : 0,
-      t_load_target: operatingCycle_Lenght_txt
-        ? operatingCycle_Lenght_txt
-        : 0,
-      SV_Load_target: space_velocity_txt
-        ? Number(
+    const MAIN_INPUT = tabAvailable.IXD
+      ? {
+          Export_to_Excel: 0,
+          Name_1: "", //It will be updated by middleware before sending to Calc-engine
+          Name_2: "", //It will be updated by middleware before sending to Calc-engine
+          Name_3: "", //It will be updated by middleware before sending to Calc-engine
+          Name_4: "", //It will be updated by middleware before sending to Calc-engine
+          Name_Inert1: "", //It will be updated by middleware before sending to Calc-engine
+          Name_Inert2: "", //It will be updated by middleware before sending to Calc-engine
+          Name_Inert3: "", //It will be updated by middleware before sending to Calc-engine
+          Flag_Evaluate_Type: true,
+          Flag_Degas: degasifation_ind !== null && degasifation_ind,
+          Flag_Custom_Resin_Volume_1: false,
+          Flag_Vessel_1_Custom: false,
+          Flag_Custom_Inert_Height: false,
+          Flag_Overrun_Computation:
+            listProductQualityandregeneration[0]?.overAllComputation == 1
+              ? true
+              : false,
+          Flag_neutral_Effluent:
+            listProductQualityandregeneration[0]?.naturalEffect === 2 && true,
+          Flag_Optimise_Dose:
+            listProductQualityandregeneration[0]?.doseOptimization === 2 &&
+            true,
+          Flag_Overall_Process: 7, //needs to be dynamic when more technology(currently we are using only demineralization)
+          Flag_CP_Sub_Process: 0, //IXCPP
+          Flag_Layout:
+            parseFloat(trains_StandBy) > 0 && trains_StandBy !== null
+              ? 2
+              : no_Buffer_Tank_ind === true
+              ? 0
+              : 1,
+          Bypass_Fraction: bypassed !== null ? parseFloat(bypassed) : 0,
+          N_trains_online:
+            trains_Online !== null ? parseFloat(trains_Online) : 0,
+          N_trains_Standby:
+            trains_StandBy !== null ? parseFloat(trains_StandBy) : 0,
+          Flag_Evaluation_Mode: plantDesignInd,
+          Flag_Design_Criteria:
+            evaluateExisiting_ind_RuntimeOptimized === true ? 1 : 0,
+          t_load_target: operatingCycle_Lenght_txt
+            ? operatingCycle_Lenght_txt
+            : 0,
+          SV_Load_target: space_velocity_txt
+            ? Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  space_velocity_txt,
+                  "BV/h",
+                  unit.selectedUnits[10]
+                ).toFixed(2)
+              )
+            : 0,
+          Flag_Design_Scavenger: 0, //IXCPP
+          Flag_Design_Cation: cationResin, //It will be updated by middleware before sending to Calc-engine
+          Flag_Design_Anion: anionResin, //It will be updated by middleware  before sending to Calc-engine
+          Flag_Design_Polish: 0, //IXCPP
+          Flag_Design_CPP: 0, //IXCPP
+          Flag_Degas_Target_Type:
+            selectedEffluent !== null ? selectedEffluent : 0,
+          Degas_Target: effluentValue !== null ? effluentValue : 0,
+          Flag_Degas_Location: location !== null ? location : 0,
+          Flag_Ionic_Form_1: 5, //It will be updated by middleware before sending to Calc-engine
+          Flag_Ionic_Form_2: 5, //It will be updated by middleware before sending to Calc-engine
+          Flag_Ionic_Form_3: 5, //It will be updated by middleware before sending to Calc-engine
+          Flag_Ionic_Form_4: 5, //It will be updated by middleware before sending to Calc-engine
+          Resin_Packaging_Size_1: 1,
+          Resin_Packaging_Size_2: 1,
+          Resin_Packaging_Size_3: 1,
+          Resin_Packaging_Size_4: 1,
+          Custom_Resin_Volume_1:
+            dummyReportListFinal.length > 0 &&
+            dummyReportListFinal[0]?.resinVolumeAsDelivered
+              ? dummyReportListFinal[0]?.resinVolumeAsDelivered
+              : 0,
+          Custom_Resin_Volume_2:
+            dummyReportListFinal.length > 1 &&
+            dummyReportListFinal[1]?.resinVolumeAsDelivered
+              ? dummyReportListFinal[1]?.resinVolumeAsDelivered
+              : 0,
+          Custom_Resin_Volume_3:
+            dummyReportListFinal.length > 2 &&
+            dummyReportListFinal[2]?.resinVolumeAsDelivered
+              ? dummyReportListFinal[2]?.resinVolumeAsDelivered
+              : 0,
+          Custom_Resin_Volume_4:
+            dummyReportListFinal.length > 3 &&
+            dummyReportListFinal[3]?.resinVolumeAsDelivered
+              ? dummyReportListFinal[3]?.resinVolumeAsDelivered
+              : 0,
+          Capacity_Safety_Factor_1:
+            listProductQualityandregeneration[0]?.saftyFactorVal,
+          Capacity_Safety_Factor_2: parseFloat(
+            listProductQualityandregeneration[1]?.saftyFactorVal
+          ),
+          Capacity_Safety_Factor_3:
+            listProductQualityandregeneration[0]?.regeneratDoseVal1,
+          Capacity_Safety_Factor_4:
+            listProductQualityandregeneration[1]?.regeneratDoseVal1,
+          Flag_Vessel_1_Regen_Sys: vessel1 !== null ? vessel1 : 0,
+          Flag_Vessel_2_Regen_Sys: vessel2 !== null ? vessel2 : 0,
+          Flag_Vessel_3_Regen_Sys: vessel3 !== null ? vessel3 : 0,
+          Flag_Vessel_4_Regen_Sys: vessel4 !== null ? vessel4 : 0,
+          Flag_Vessel_1_Inert: 0, //It will be updated by middleware before sending to Calc-engine
+          Flag_Vessel_2_Inert: 0, //It will be updated by middleware before sending to Calc-engine
+          Flag_Vessel_3_Inert: 0, //It will be updated by middleware before sending to Calc-engine
+          Flag_Vessel_4_Inert: 0, //It will be updated by middleware before sending to Calc-engine
+          Vessel_1_Custom_Diameter:
+            dummyReportListFinal.length > 0 &&
+            dummyReportListFinal[0]?.vesselDiameter
+              ? dummyReportListFinal[0]?.vesselDiameter
+              : 0,
+          Vessel_2_Custom_Diameter:
+            dummyReportListFinal.length > 1 &&
+            dummyReportListFinal[1]?.vesselDiameter
+              ? dummyReportListFinal[1]?.vesselDiameter
+              : 0,
+          Vessel_3_Custom_Diameter:
+            dummyReportListFinal.length > 2 &&
+            dummyReportListFinal[2]?.vesselDiameter
+              ? dummyReportListFinal[2]?.vesselDiameter
+              : 0,
+          Vessel_4_Custom_Diameter:
+            dummyReportListFinal.length > 3 &&
+            dummyReportListFinal[3]?.vesselDiameter
+              ? dummyReportListFinal[3]?.vesselDiameter
+              : 0,
+          Vessel_1_Custom_Wall:
+            dummyReportListFinal.length > 0 &&
+            dummyReportListFinal[0]?.vesselWallThickness
+              ? dummyReportListFinal[0]?.vesselWallThickness
+              : 0,
+          Vessel_2_Custom_Wall:
+            dummyReportListFinal.length > 1 &&
+            dummyReportListFinal[1]?.vesselWallThickness
+              ? dummyReportListFinal[1]?.vesselWallThickness
+              : 0,
+          Vessel_3_Custom_Wall:
+            dummyReportListFinal.length > 2 &&
+            dummyReportListFinal[2]?.vesselWallThickness
+              ? dummyReportListFinal[2]?.vesselWallThickness
+              : 0,
+          Vessel_4_Custom_Wall:
+            dummyReportListFinal.length > 3 &&
+            dummyReportListFinal[3]?.vesselWallThickness
+              ? dummyReportListFinal[3]?.vesselWallThickness
+              : 0,
+          Vessel_1_Custom_Height:
+            dummyReportListFinal.length > 0 &&
+            dummyReportListFinal[0]?.vesselCylindricalHeight
+              ? dummyReportListFinal[0]?.vesselCylindricalHeight
+              : 0,
+          Vessel_2_Custom_Height:
+            dummyReportListFinal.length > 1 &&
+            dummyReportListFinal[1]?.vesselCylindricalHeight
+              ? dummyReportListFinal[1]?.vesselCylindricalHeight
+              : 0,
+          Vessel_3_Custom_Height:
+            dummyReportListFinal.length > 2 &&
+            dummyReportListFinal[2]?.vesselCylindricalHeight
+              ? dummyReportListFinal[2]?.vesselCylindricalHeight
+              : 0,
+          Vessel_4_Custom_Height:
+            dummyReportListFinal.length > 3 &&
+            dummyReportListFinal[3]?.vesselCylindricalHeight
+              ? dummyReportListFinal[3]?.vesselCylindricalReight
+              : 0,
+          Vessel_1_Comp_1_Custom_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length > 0 &&
+                dummyReportListFinal[0]?.vesselCylindricalHeight
+                ? dummyReportListFinal[0]?.vesselCylindricalHeight
+                : 0
+              : 0,
+          Vessel_2_Comp_1_Custom_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length > 1 &&
+                dummyReportListFinal[1]?.vesselCylindricalHeight
+                ? dummyReportListFinal[1]?.vesselCylindricalHeight
+                : 0
+              : 0,
+          Vessel_3_Comp_1_Custom_Height: 0,
+          Vessel_4_Comp_1_Custom_Height: 0,
+          Vessel_1_Comp_2_Custom_Height: 0,
+          Vessel_2_Comp_2_Custom_Height: 0,
+          Vessel_3_Comp_2_Custom_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length2 &&
+                dummyReportListFinal[2].vesselCylindricalHeight
+                ? dummyReportListFinal[2].vesselCylindricalHeight
+                : 0
+              : 0,
+          Vessel_4_Comp_2_Custom_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length3 &&
+                dummyReportListFinal[3].vesselCylindricalHeight
+                ? dummyReportListFinal[3].vesselCylindricalHeight
+                : 0
+              : 0,
+          Vessel_1_Custom_Inert_Height:
+            dummyReportListFinal.length >= 0 &&
+            dummyReportListFinal[0]?.inertBedHeight
+              ? dummyReportListFinal[0]?.inertBedHeight
+              : 0,
+          Vessel_2_Custom_Inert_Height:
+            dummyReportListFinal.length >= 1 &&
+            dummyReportListFinal[1]?.inertBedHeight
+              ? dummyReportListFinal[1]?.inertBedHeight
+              : 0,
+          Vessel_3_Custom_Inert_Height:
+            dummyReportListFinal.length >= 2 &&
+            dummyReportListFinal[2]?.inertBedHeight
+              ? dummyReportListFinal[2]?.inertBedHeight
+              : 0,
+          Vessel_4_Custom_Inert_Height:
+            dummyReportListFinal.length >= 3 &&
+            dummyReportListFinal[3]?.inertBedHeight
+              ? dummyReportListFinal[3]?.inertBedHeight
+              : 0,
+          Vessel_1_Comp_1_Custom_Inert_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length > 0 &&
+                dummyReportListFinal[0].inertBedHeight
+                ? dummyReportListFinal[0].inertBedHeight
+                : 0
+              : 0,
+          Vessel_2_Comp_1_Custom_Inert_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length > 1 &&
+                dummyReportListFinal[1].inertBedHeight
+                ? dummyReportListFinal[1].inertBedHeight
+                : 0
+              : 0,
+          Vessel_3_Comp_1_Custom_Inert_Height: 0,
+          Vessel_4_Comp_1_Custom_Inert_Height: 0,
+          Vessel_1_Comp_2_Custom_Inert_Height: 0,
+          Vessel_2_Comp_2_Custom_Inert_Height: 0,
+          Vessel_3_Comp_2_Custom_Inert_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length > 2 &&
+                dummyReportListFinal[2].inertBedHeight
+                ? dummyReportListFinal[2].inertBedHeight
+                : 0
+              : 0,
+          Vessel_4_Comp_2_Custom_Inert_Height:
+            anionResin === cationResin
+              ? dummyReportListFinal.length > 3 &&
+                dummyReportListFinal[3].inertBedHeight
+                ? dummyReportListFinal[3].inertBedHeight
+                : 0
+              : 0,
+          Flag_Regenerant_1:
+            listRegenConds.length > 0 && listRegenConds[0]?.regenerantID,
+          Flag_Regenerant_2:
+            listRegenConds.length > 1 && listRegenConds[1]?.regenerantID,
+          Regenerant_1_Stock_Conc_Percent: 0, //It will be updated by middleware before sending to Calc-engine
+          Regenerant_2_Stock_Conc_Percent: 0, //It will be updated by middleware before sending to Calc-engine
+          Regenerant_1_Price_Bulk: 0, //It will be updated by middleware before sending to Calc-engine
+          Regenerant_2_Price_Bulk: 0, //It will be updated by middleware before sending to Calc-engine
+          Temp_bulk_regenerant: 25, //It is form equpiment Page(Not in december scope)
+          RegenProt_1_Temperature: listRegenConds.length > 0 && cationTemp,
+          RegenProt_2_Temperature: listRegenConds.length > 1 && anionTemp,
+          RegenProt_3_Temperature: 0,
+          // RegenProt_1_Steps:
+          //   listRegenConds.length > 0 && listRegenConds[0]?.step1_ind === true
+          //     ? 1
+          //     : 0,
+          // RegenProt_2_Steps:
+          //   listRegenConds.length > 1 && listRegenConds[1]?.step1_ind === true
+          //     ? 1
+          //     : 0,
+          RegenProt_3_Steps: 0,
+          ...cation,
+          ...anion,
+          RegenProt_3_Conc_Percent_n0: 0.0,
+          RegenProt_3_Conc_Percent_n1: 0.0,
+          RegenProt_3_Conc_Percent_n2: 0.0,
+          RegenProt_3_Conc_Percent_n3: 0.0,
+          RegenProt_3_fraction_n1: 0.0,
+          RegenProt_3_fraction_n2: 0.0,
+          RegenProt_3_fraction_n3: 0.0,
+          RegenProt_1_Dose_Target: Number(cationRegenreteDoseVel?.toFixed(2)),
+          RegenProt_2_Dose_Target: Number(anionRegenreteDoseVel?.toFixed(2)),
+          RegenProt_3_Dose_Target: 0,
+          RegenProt_1_Ratio_Target: listProductQualityandregeneration[0]
+            ?.regenerationRatio
+            ? parseFloat(listProductQualityandregeneration[0].regenerationRatio)
+            : 0,
+
+          RegenProt_2_Ratio_Target: listProductQualityandregeneration[1]
+            ?.regenerationRatio
+            ? parseFloat(listProductQualityandregeneration[1].regenerationRatio)
+            : 0,
+          // RegenProt_1_Ratio_Target: 0,
+          // RegenProt_2_Ratio_Target: 0,
+          RegenProt_3_Ratio_Target: 0,
+          RegenProt_1_Manual_Overrun_Factor:
+            listProductQualityandregeneration[0]?.regenerantDoseVal2,
+          RegenProt_2_Manual_Overrun_Factor:
+            listProductQualityandregeneration[1]?.regenerantDoseVal2,
+          // RegenProt_1_Manual_Overrun_Factor: 0,
+          // RegenProt_2_Manual_Overrun_Factor: 0,
+          RegenProt_3_Manual_Overrun_Factor: 0,
+          Flag_RegenProt_1_BW_Source:
+            listRegenConds.length > 0 && listRegenConds[0]?.backwash !== null
+              ? listRegenConds[0]?.backwash
+              : 0,
+          Flag_RegenProt_2_BW_Source:
+            listRegenConds.length > 1 && listRegenConds[1]?.backwash !== null
+              ? listRegenConds[1]?.backwash
+              : 0,
+          Flag_RegenProt_3_BW_Source: 0,
+          Flag_RegenProt_1_Service_Source:
+            listRegenConds.length > 0 &&
+            listRegenConds[0]?.serviceWater !== null
+              ? listRegenConds[0]?.serviceWater
+              : 0,
+          Flag_RegenProt_2_Service_Source:
+            listRegenConds.length > 1 &&
+            listRegenConds[1]?.serviceWater !== null
+              ? listRegenConds[1]?.serviceWater
+              : 0,
+          Flag_RegenProt_3_Service_Source: 0,
+          RegenProt_1_BW_interval:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.bwFrequency,
+          RegenProt_2_BW_interval:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.bwFrequency,
+          RegenProt_3_BW_interval: 0,
+          RegenProt_1_BW_expansion:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.bwExpansion,
+          RegenProt_2_BW_expansion:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.bwExpansion,
+          RegenProt_3_BW_expansion: 0,
+          RegenProt_1_BW_duration:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.bwDuration !== 0
+              ? parseFloat(listAdvRegen[0]?.bwDuration / 60)
+              : 0,
+          RegenProt_2_BW_duration:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.bwDuration !== 0
+              ? parseFloat(listAdvRegen[1]?.bwDuration / 60)
+              : 0,
+          RegenProt_3_BW_duration: 0,
+          RegenProt_1_Compact_t:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.compactionDuration !== 0
+              ? parseFloat(listAdvRegen[0]?.compactionDuration / 60)
+              : 0,
+          RegenProt_2_Compact_t:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.compactionDuration !== 0
+              ? parseFloat(listAdvRegen[1]?.compactionDuration / 60)
+              : 0,
+          RegenProt_3_Compact_t: 0,
+          RegenProt_1_Regeneration_SV:
+            listAdvRegen.length > 0 && cationregenVel,
+          RegenProt_2_Regeneration_SV:
+            listAdvRegen.length > 1 && anionregeneVel,
+          RegenProt_3_Regeneration_SV: 0,
+          RegenProt_1_Water_Block_factor:
+            listAdvRegen.length > 0 &&
+            listAdvRegen[0]?.regenerationFactor / 100,
+          RegenProt_2_Water_Block_factor:
+            listAdvRegen.length > 1 &&
+            listAdvRegen[1]?.regenerationFactor / 100,
+          // RegenProt_1_Water_Block_factor: 1,
+          // RegenProt_2_Water_Block_factor: 1,
+          RegenProt_3_Water_Block_factor: 0,
+          Flag_RegenProt_1_Displacement_Rinse:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.displacementFlow,
+          Flag_RegenProt_2_Displacement_Rinse:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.displacementFlow,
+          Flag_RegenProt_3_Displacement_Rinse: 0,
+          RegenProt_1_Displ_Rinse_BV:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.displacementVolume,
+          RegenProt_2_Displ_Rinse_BV:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.displacementVolume,
+          RegenProt_3_Displ_Rinse_BV: 0,
+          Flag_RegenProt_1_Rinse_Recycle:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.fatRinseRecycle - 1,
+          Flag_RegenProt_2_Rinse_Recycle:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.fatRinseRecycle - 1,
+          // Flag_RegenProt_1_Rinse_Recycle: 0,
+          // Flag_RegenProt_2_Rinse_Recycle: 0,
+          // Flag_RegenProt_3_Rinse_Recycle: 0,
+          RegenProt_1_Fast_Rinse_BV:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.fatRinseVolume,
+          RegenProt_2_Fast_Rinse_BV:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.fatRinseVolume,
+          RegenProt_3_Fast_Rinse_BV: 0,
+          RegenProt_1_Settling_t:
+            listAdvRegen.length > 0 && listAdvRegen[0]?.settingDuration / 60,
+          RegenProt_2_Settling_t:
+            listAdvRegen.length > 1 && listAdvRegen[1]?.settingDuration / 60,
+          RegenProt_3_Settling_t: 0,
+          Typical_Org_Ads_Demin:
+            parseFloat(
+              listProductQualityandregeneration[1]?.endpointConductivityVal
+            ) / 100,
+          Typical_Org_Ads_Scav: 0.75, //Not in case of IXD
+          PD_Distributors: 0.05, //It is form equpiment Page(Not in december scope)
+          PD_Piping: 0.1, //It is form equpiment Page(Not in december scope)
+          Product_Pressure: 1.0, //It is form equpiment Page(Not in december scope)
+          Crud_Input: 0.01, //It applies only to IXCP. On Condensate Polishing additional parameters. Pop up => CRUD
+          Price_Electricity: chemicalConfig.operatingCost?.electricity,
+          Price_Raw_Water: chemicalConfig.operatingCost.rawWater,
+          Price_Waste_Water: chemicalConfig.operatingCost.wasteWaterDisposal,
+          Efficiency_Pump_Feed: pumpCofig.pupmList.find((a) => a.pumpID == 62)
+            .pumpEfficiency,
+          Efficiency_Motor_Feed: pumpCofig.pupmList.find((a) => a.pumpID == 62)
+            .motorEfficiency,
+          Efficiency_Pump_BW: pumpCofig.pupmList.find((a) => a.pumpID == 63)
+            .pumpEfficiency,
+          Efficiency_Motor_BW: pumpCofig.pupmList.find((a) => a.pumpID == 63)
+            .motorEfficiency,
+          Efficiency_Pump_Regen: pumpCofig.pupmList.find((a) => a.pumpID == 64)
+            .pumpEfficiency,
+          Efficiency_Motor_Regen: pumpCofig.pupmList.find((a) => a.pumpID == 64)
+            .motorEfficiency,
+          Efficiency_Compressor: pumpCofig.pupmList.find((a) => a.pumpID == 65)
+            .pumpEfficiency,
+          Efficiency_Compressor_Motor: pumpCofig.pupmList.find(
+            (a) => a.pumpID == 65
+          ).motorEfficiency,
+          Flow_System_Design: Number(
             GlobalUnitConversion(
               GlobalUnitConversionStore,
-              space_velocity_txt,
-              "BV/h",
-              unit.selectedUnits[10]
-            ).toFixed(2)
-          )
-        : 0,
-      Flag_Design_Scavenger: 0, //IXCPP
-      Flag_Design_Cation: cationResin, //It will be updated by middleware before sending to Calc-engine
-      Flag_Design_Anion: anionResin, //It will be updated by middleware  before sending to Calc-engine
-      Flag_Design_Polish: 0, //IXCPP
-      Flag_Design_CPP: 0, //IXCPP
-      Flag_Degas_Target_Type:
-        selectedEffluent !== null ? selectedEffluent : 0,
-      Degas_Target: effluentValue !== null ? effluentValue : 0,
-      Flag_Degas_Location: location !== null ? location : 0,
-      Flag_Ionic_Form_1: 5, //It will be updated by middleware before sending to Calc-engine
-      Flag_Ionic_Form_2: 5, //It will be updated by middleware before sending to Calc-engine
-      Flag_Ionic_Form_3: 5, //It will be updated by middleware before sending to Calc-engine
-      Flag_Ionic_Form_4: 5, //It will be updated by middleware before sending to Calc-engine
-      Resin_Packaging_Size_1: 1,
-      Resin_Packaging_Size_2: 1,
-      Resin_Packaging_Size_3: 1,
-      Resin_Packaging_Size_4: 1,
-      Custom_Resin_Volume_1:
-        dummyReportListFinal.length > 0 &&
-        dummyReportListFinal[0]?.resinVolumeAsDelivered
-          ? dummyReportListFinal[0]?.resinVolumeAsDelivered
-          : 0,
-      Custom_Resin_Volume_2:
-        dummyReportListFinal.length > 1 &&
-        dummyReportListFinal[1]?.resinVolumeAsDelivered
-          ? dummyReportListFinal[1]?.resinVolumeAsDelivered
-          : 0,
-      Custom_Resin_Volume_3:
-        dummyReportListFinal.length > 2 &&
-        dummyReportListFinal[2]?.resinVolumeAsDelivered
-          ? dummyReportListFinal[2]?.resinVolumeAsDelivered
-          : 0,
-      Custom_Resin_Volume_4:
-        dummyReportListFinal.length > 3 &&
-        dummyReportListFinal[3]?.resinVolumeAsDelivered
-          ? dummyReportListFinal[3]?.resinVolumeAsDelivered
-          : 0,
-      Capacity_Safety_Factor_1:
-        listProductQualityandregeneration[0]?.saftyFactorVal,
-      Capacity_Safety_Factor_2: parseFloat(
-        listProductQualityandregeneration[1]?.saftyFactorVal
-      ),
-      Capacity_Safety_Factor_3:
-        listProductQualityandregeneration[0]?.regeneratDoseVal1,
-      Capacity_Safety_Factor_4:
-        listProductQualityandregeneration[1]?.regeneratDoseVal1,
-      Flag_Vessel_1_Regen_Sys: vessel1 !== null ? vessel1 : 0,
-      Flag_Vessel_2_Regen_Sys: vessel2 !== null ? vessel2 : 0,
-      Flag_Vessel_3_Regen_Sys: vessel3 !== null ? vessel3 : 0,
-      Flag_Vessel_4_Regen_Sys: vessel4 !== null ? vessel4 : 0,
-      Flag_Vessel_1_Inert: 0, //It will be updated by middleware before sending to Calc-engine
-      Flag_Vessel_2_Inert: 0, //It will be updated by middleware before sending to Calc-engine
-      Flag_Vessel_3_Inert: 0, //It will be updated by middleware before sending to Calc-engine
-      Flag_Vessel_4_Inert: 0, //It will be updated by middleware before sending to Calc-engine
-      Vessel_1_Custom_Diameter:
-        dummyReportListFinal.length > 0 &&
-        dummyReportListFinal[0]?.vesselDiameter
-          ? dummyReportListFinal[0]?.vesselDiameter
-          : 0,
-      Vessel_2_Custom_Diameter:
-        dummyReportListFinal.length > 1 &&
-        dummyReportListFinal[1]?.vesselDiameter
-          ? dummyReportListFinal[1]?.vesselDiameter
-          : 0,
-      Vessel_3_Custom_Diameter:
-        dummyReportListFinal.length > 2 &&
-        dummyReportListFinal[2]?.vesselDiameter
-          ? dummyReportListFinal[2]?.vesselDiameter
-          : 0,
-      Vessel_4_Custom_Diameter:
-        dummyReportListFinal.length > 3 &&
-        dummyReportListFinal[3]?.vesselDiameter
-          ? dummyReportListFinal[3]?.vesselDiameter
-          : 0,
-      Vessel_1_Custom_Wall:
-        dummyReportListFinal.length > 0 &&
-        dummyReportListFinal[0]?.vesselWallThickness
-          ? dummyReportListFinal[0]?.vesselWallThickness
-          : 0,
-      Vessel_2_Custom_Wall:
-        dummyReportListFinal.length > 1 &&
-        dummyReportListFinal[1]?.vesselWallThickness
-          ? dummyReportListFinal[1]?.vesselWallThickness
-          : 0,
-      Vessel_3_Custom_Wall:
-        dummyReportListFinal.length > 2 &&
-        dummyReportListFinal[2]?.vesselWallThickness
-          ? dummyReportListFinal[2]?.vesselWallThickness
-          : 0,
-      Vessel_4_Custom_Wall:
-        dummyReportListFinal.length > 3 &&
-        dummyReportListFinal[3]?.vesselWallThickness
-          ? dummyReportListFinal[3]?.vesselWallThickness
-          : 0,
-      Vessel_1_Custom_Height:
-        dummyReportListFinal.length > 0 &&
-        dummyReportListFinal[0]?.vesselCylindricalHeight
-          ? dummyReportListFinal[0]?.vesselCylindricalHeight
-          : 0,
-      Vessel_2_Custom_Height:
-        dummyReportListFinal.length > 1 &&
-        dummyReportListFinal[1]?.vesselCylindricalHeight
-          ? dummyReportListFinal[1]?.vesselCylindricalHeight
-          : 0,
-      Vessel_3_Custom_Height:
-        dummyReportListFinal.length > 2 &&
-        dummyReportListFinal[2]?.vesselCylindricalHeight
-          ? dummyReportListFinal[2]?.vesselCylindricalHeight
-          : 0,
-      Vessel_4_Custom_Height:
-        dummyReportListFinal.length > 3 &&
-        dummyReportListFinal[3]?.vesselCylindricalHeight
-          ? dummyReportListFinal[3]?.vesselCylindricalReight
-          : 0,
-      Vessel_1_Comp_1_Custom_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length > 0 &&
-            dummyReportListFinal[0]?.vesselCylindricalHeight
-            ? dummyReportListFinal[0]?.vesselCylindricalHeight
-            : 0
-          : 0,
-      Vessel_2_Comp_1_Custom_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length > 1 &&
-            dummyReportListFinal[1]?.vesselCylindricalHeight
-            ? dummyReportListFinal[1]?.vesselCylindricalHeight
-            : 0
-          : 0,
-      Vessel_3_Comp_1_Custom_Height: 0,
-      Vessel_4_Comp_1_Custom_Height: 0,
-      Vessel_1_Comp_2_Custom_Height: 0,
-      Vessel_2_Comp_2_Custom_Height: 0,
-      Vessel_3_Comp_2_Custom_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length2 &&
-            dummyReportListFinal[2].vesselCylindricalHeight
-            ? dummyReportListFinal[2].vesselCylindricalHeight
-            : 0
-          : 0,
-      Vessel_4_Comp_2_Custom_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length3 &&
-            dummyReportListFinal[3].vesselCylindricalHeight
-            ? dummyReportListFinal[3].vesselCylindricalHeight
-            : 0
-          : 0,
-      Vessel_1_Custom_Inert_Height:
-        dummyReportListFinal.length >= 0 &&
-        dummyReportListFinal[0]?.inertBedHeight
-          ? dummyReportListFinal[0]?.inertBedHeight
-          : 0,
-      Vessel_2_Custom_Inert_Height:
-        dummyReportListFinal.length >= 1 &&
-        dummyReportListFinal[1]?.inertBedHeight
-          ? dummyReportListFinal[1]?.inertBedHeight
-          : 0,
-      Vessel_3_Custom_Inert_Height:
-        dummyReportListFinal.length >= 2 &&
-        dummyReportListFinal[2]?.inertBedHeight
-          ? dummyReportListFinal[2]?.inertBedHeight
-          : 0,
-      Vessel_4_Custom_Inert_Height:
-        dummyReportListFinal.length >= 3 &&
-        dummyReportListFinal[3]?.inertBedHeight
-          ? dummyReportListFinal[3]?.inertBedHeight
-          : 0,
-      Vessel_1_Comp_1_Custom_Inert_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length > 0 &&
-            dummyReportListFinal[0].inertBedHeight
-            ? dummyReportListFinal[0].inertBedHeight
-            : 0
-          : 0,
-      Vessel_2_Comp_1_Custom_Inert_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length > 1 &&
-            dummyReportListFinal[1].inertBedHeight
-            ? dummyReportListFinal[1].inertBedHeight
-            : 0
-          : 0,
-      Vessel_3_Comp_1_Custom_Inert_Height: 0,
-      Vessel_4_Comp_1_Custom_Inert_Height: 0,
-      Vessel_1_Comp_2_Custom_Inert_Height: 0,
-      Vessel_2_Comp_2_Custom_Inert_Height: 0,
-      Vessel_3_Comp_2_Custom_Inert_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length > 2 &&
-            dummyReportListFinal[2].inertBedHeight
-            ? dummyReportListFinal[2].inertBedHeight
-            : 0
-          : 0,
-      Vessel_4_Comp_2_Custom_Inert_Height:
-        anionResin === cationResin
-          ? dummyReportListFinal.length > 3 &&
-            dummyReportListFinal[3].inertBedHeight
-            ? dummyReportListFinal[3].inertBedHeight
-            : 0
-          : 0,
-      Flag_Regenerant_1:
-        listRegenConds.length > 0 && listRegenConds[0]?.regenerantID,
-      Flag_Regenerant_2:
-        listRegenConds.length > 1 && listRegenConds[1]?.regenerantID,
-      Regenerant_1_Stock_Conc_Percent: 0, //It will be updated by middleware before sending to Calc-engine
-      Regenerant_2_Stock_Conc_Percent: 0, //It will be updated by middleware before sending to Calc-engine
-      Regenerant_1_Price_Bulk: 0, //It will be updated by middleware before sending to Calc-engine
-      Regenerant_2_Price_Bulk: 0, //It will be updated by middleware before sending to Calc-engine
-      Temp_bulk_regenerant: 25, //It is form equpiment Page(Not in december scope)
-      RegenProt_1_Temperature: listRegenConds.length > 0 && cationTemp,
-      RegenProt_2_Temperature: listRegenConds.length > 1 && anionTemp,
-      RegenProt_3_Temperature: 0,
-      // RegenProt_1_Steps:
-      //   listRegenConds.length > 0 && listRegenConds[0]?.step1_ind === true
-      //     ? 1
-      //     : 0,
-      // RegenProt_2_Steps:
-      //   listRegenConds.length > 1 && listRegenConds[1]?.step1_ind === true
-      //     ? 1
-      //     : 0,
-      RegenProt_3_Steps: 0,
-      ...cation,
-      ...anion,
-      RegenProt_3_Conc_Percent_n0: 0.0,
-      RegenProt_3_Conc_Percent_n1: 0.0,
-      RegenProt_3_Conc_Percent_n2: 0.0,
-      RegenProt_3_Conc_Percent_n3: 0.0,
-      RegenProt_3_fraction_n1: 0.0,
-      RegenProt_3_fraction_n2: 0.0,
-      RegenProt_3_fraction_n3: 0.0,
-      RegenProt_1_Dose_Target: Number(cationRegenreteDoseVel?.toFixed(2)),
-      RegenProt_2_Dose_Target: Number(anionRegenreteDoseVel?.toFixed(2)),
-      RegenProt_3_Dose_Target: 0,
-      RegenProt_1_Ratio_Target: listProductQualityandregeneration[0]
-        ?.regeneratDoseVal2
-        ? listProductQualityandregeneration[0].regeneratDoseVal2
-        : 0,
+              feedFlowRate,
+              "m³/h",
+              unit.selectedUnits[1]
+            ).toFixed(3)
+          ),
 
-      RegenProt_2_Ratio_Target: listProductQualityandregeneration[1]
-        ?.regeneratDoseVal2
-        ? listProductQualityandregeneration[1].regeneratDoseVal2
-        : 0,
-      // RegenProt_1_Ratio_Target: 0,
-      // RegenProt_2_Ratio_Target: 0,
-      RegenProt_3_Ratio_Target: 0,
-      RegenProt_1_Manual_Overrun_Factor:
-        listProductQualityandregeneration[0]?.regenerantDoseVal2,
-      RegenProt_2_Manual_Overrun_Factor:
-        listProductQualityandregeneration[1]?.regenerantDoseVal2,
-      // RegenProt_1_Manual_Overrun_Factor: 0,
-      // RegenProt_2_Manual_Overrun_Factor: 0,
-      RegenProt_3_Manual_Overrun_Factor: 0,
-      Flag_RegenProt_1_BW_Source:
-        listRegenConds.length > 0 && listRegenConds[0]?.backwash !== null
-          ? listRegenConds[0]?.backwash
-          : 0,
-      Flag_RegenProt_2_BW_Source:
-        listRegenConds.length > 1 && listRegenConds[1]?.backwash !== null
-          ? listRegenConds[1]?.backwash
-          : 0,
-      Flag_RegenProt_3_BW_Source: 0,
-      Flag_RegenProt_1_Service_Source:
-        listRegenConds.length > 0 &&
-        listRegenConds[0]?.serviceWater !== null
-          ? listRegenConds[0]?.serviceWater
-          : 0,
-      Flag_RegenProt_2_Service_Source:
-        listRegenConds.length > 1 &&
-        listRegenConds[1]?.serviceWater !== null
-          ? listRegenConds[1]?.serviceWater
-          : 0,
-      Flag_RegenProt_3_Service_Source: 0,
-      RegenProt_1_BW_interval:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.bwFrequency,
-      RegenProt_2_BW_interval:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.bwFrequency,
-      RegenProt_3_BW_interval: 0,
-      RegenProt_1_BW_expansion:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.bwExpansion,
-      RegenProt_2_BW_expansion:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.bwExpansion,
-      RegenProt_3_BW_expansion: 0,
-      RegenProt_1_BW_duration:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.bwDuration !== 0
-          ? parseFloat(listAdvRegen[0]?.bwDuration / 60)
-          : 0,
-      RegenProt_2_BW_duration:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.bwDuration !== 0
-          ? parseFloat(listAdvRegen[1]?.bwDuration / 60)
-          : 0,
-      RegenProt_3_BW_duration: 0,
-      RegenProt_1_Compact_t:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.compactionDuration !== 0
-          ? parseFloat(listAdvRegen[0]?.compactionDuration / 60)
-          : 0,
-      RegenProt_2_Compact_t:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.compactionDuration !== 0
-          ? parseFloat(listAdvRegen[1]?.compactionDuration / 60)
-          : 0,
-      RegenProt_3_Compact_t: 0,
-      RegenProt_1_Regeneration_SV:
-        listAdvRegen.length > 0 && cationregenVel,
-      RegenProt_2_Regeneration_SV:
-        listAdvRegen.length > 1 && anionregeneVel,
-      RegenProt_3_Regeneration_SV: 0,
-      RegenProt_1_Water_Block_factor:
-        listAdvRegen.length > 0 &&
-        listAdvRegen[0]?.regenerationFactor / 100,
-      RegenProt_2_Water_Block_factor:
-        listAdvRegen.length > 1 &&
-        listAdvRegen[1]?.regenerationFactor / 100,
-      // RegenProt_1_Water_Block_factor: 1,
-      // RegenProt_2_Water_Block_factor: 1,
-      RegenProt_3_Water_Block_factor: 0,
-      Flag_RegenProt_1_Displacement_Rinse:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.displacementFlow,
-      Flag_RegenProt_2_Displacement_Rinse:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.displacementFlow,
-      Flag_RegenProt_3_Displacement_Rinse: 0,
-      RegenProt_1_Displ_Rinse_BV:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.displacementVolume,
-      RegenProt_2_Displ_Rinse_BV:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.displacementVolume,
-      RegenProt_3_Displ_Rinse_BV: 0,
-      Flag_RegenProt_1_Rinse_Recycle:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.fatRinseRecycle - 1,
-      Flag_RegenProt_2_Rinse_Recycle:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.fatRinseRecycle - 1,
-      // Flag_RegenProt_1_Rinse_Recycle: 0,
-      // Flag_RegenProt_2_Rinse_Recycle: 0,
-      // Flag_RegenProt_3_Rinse_Recycle: 0,
-      RegenProt_1_Fast_Rinse_BV:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.fatRinseVolume,
-      RegenProt_2_Fast_Rinse_BV:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.fatRinseVolume,
-      RegenProt_3_Fast_Rinse_BV: 0,
-      RegenProt_1_Settling_t:
-        listAdvRegen.length > 0 && listAdvRegen[0]?.settingDuration / 60,
-      RegenProt_2_Settling_t:
-        listAdvRegen.length > 1 && listAdvRegen[1]?.settingDuration / 60,
-      RegenProt_3_Settling_t: 0,
-      Typical_Org_Ads_Demin:
-        parseFloat(
-          listProductQualityandregeneration[1]?.endpointConductivityVal
-        ) / 100,
-      Typical_Org_Ads_Scav: 0.75, //Not in case of IXD
-      PD_Distributors: 0.05, //It is form equpiment Page(Not in december scope)
-      PD_Piping: 0.1, //It is form equpiment Page(Not in december scope)
-      Product_Pressure: 1.0, //It is form equpiment Page(Not in december scope)
-      Crud_Input: 0.01, //It applies only to IXCP. On Condensate Polishing additional parameters. Pop up => CRUD
-      Price_Electricity: chemicalConfig.operatingCost?.electricity,
-      Price_Raw_Water: chemicalConfig.operatingCost.rawWater,
-      Price_Waste_Water: chemicalConfig.operatingCost.wasteWaterDisposal,
-      Efficiency_Pump_Feed: pumpCofig.pupmList.find((a) => a.pumpID == 62)
-        .pumpEfficiency,
-      Efficiency_Motor_Feed: pumpCofig.pupmList.find((a) => a.pumpID == 62)
-        .motorEfficiency,
-      Efficiency_Pump_BW: pumpCofig.pupmList.find((a) => a.pumpID == 63)
-        .pumpEfficiency,
-      Efficiency_Motor_BW: pumpCofig.pupmList.find((a) => a.pumpID == 63)
-        .motorEfficiency,
-      Efficiency_Pump_Regen: pumpCofig.pupmList.find((a) => a.pumpID == 64)
-        .pumpEfficiency,
-      Efficiency_Motor_Regen: pumpCofig.pupmList.find((a) => a.pumpID == 64)
-        .motorEfficiency,
-      Efficiency_Compressor: pumpCofig.pupmList.find((a) => a.pumpID == 65)
-        .pumpEfficiency,
-      Efficiency_Compressor_Motor: pumpCofig.pupmList.find(
-        (a) => a.pumpID == 65
-      ).motorEfficiency,
-      Flow_System_Design: Number(
-        GlobalUnitConversion(
-          GlobalUnitConversionStore,
-          feedFlowRate,
-          "m³/h",
-          unit.selectedUnits[1]
-        ).toFixed(3)
-      ),
-
-      // RegenProt_1_Ion_Conc_Leakage:
-      //   listProductQualityandregeneration[0]?.averageSpeciesVal,
-      // RegenProt_2_Ion_Conc_Leakage:
-      //   listProductQualityandregeneration[1]?.averageSpeciesVal,
-      RegenProt_1_Ion_Conc_Leakage: cationMeqlAvg,
-      RegenProt_2_Ion_Conc_Leakage: sio2MeqlAvg,
-      RegenProt_3_Ion_Conc_Leakage: 0,
-      RegenProt_1_Conductivity_Leakage: Number(
-        cationAverageConduc?.toFixed(2)
-      ),
-      RegenProt_2_Conductivity_Leakage: Number(
-        anionAverageConduc?.toFixed(2)
-      ),
-      RegenProt_3_Conductivity_Leakage: 0,
-      Organic_Adsorption_Efficiency: 0,
-      Organic_Adsorption_Efficiency_2: 0,
-      Organic_Adsorption_Efficiency_3: 0,
-      // RegenProt_1_Ion_Conc_Endpoint:
-      //   listProductQualityandregeneration[0]?.endpoingSpeciesVal,
-      // RegenProt_2_Ion_Conc_Endpoint:
-      //   listProductQualityandregeneration[1]?.endpoingSpeciesVal,
-      RegenProt_1_Ion_Conc_Endpoint: cationMeqlEnd,
-      RegenProt_2_Ion_Conc_Endpoint: sio2MeqlEnd,
-      RegenProt_3_Ion_Conc_Endpoint: 0,
-      RegenProt_1_Conductivity_Endpoint: Number(
-        cationendpointConduc?.toFixed(2)
-      ),
-      RegenProt_2_Conductivity_Endpoint: 0,
-      RegenProt_3_Conductivity_Endpoint: 0,
-      Diaminoethane_dose: 0, //It applies only to IXCP
-      Amino_2_methyl_1_propanol_dose: 0, //It applies only to IXCP
-      Methoxypropylamine_dose: 0, //It applies only to IXCP
-      Aminopentanol_dose: 0, //It applies only to IXCP
-      Cyclohexylamine_dose: 0, //It applies only to IXCP
-      Ethanolamine_dose: 0, //It applies only to IXCP
-      Morpholine_dose: 0, //It applies only to IXCP
-      Hydrazine_dose: 0, //It applies only to IXCP
-      Flow_net_product:
-        selectedEndNode == "startNode"
-          ? 0
-          : Number(
-              GlobalUnitConversion(
-                GlobalUnitConversionStore,
-                productFlowRate,
-                "m³/h",
-                unit.selectedUnits[1]
-              ).toFixed(3)
-            ),
-      //if product water than product water input needs to be send
-      TSS_IX_Input: feedDataJson?.tss, //feed water TSS iif IX is first unit operation.  If IX follows UF, RO, or another IX process, IX feed TSS = 0
-      flag_Vessel_Dimension_Units: selectedUnitbyUser,
-      Flag_RegenProt_1_Fast_Rinse_Source: fastRinseWater[0],
-      Flag_RegenProt_2_Fast_Rinse_Source: fastRinseWater[1],
-      Flag_RegenProt_3_Fast_Rinse_Source: 0,
-    }:reportData.ixReport.maiN_INPUT;
-    const FEED_WATER= tabAvailable.FeedSetup?{
-      designTemp: StreamStoreData?.tempDesign,
-      methodname: "normal",
-      TOC_System_Feed: parseFloat(feedDataJson?.toc),
-      ph: parseFloat(feedDataJson?.pH),
-      TotalDissolvedSolutes: parseFloat(
-        feedDataJson?.totalDissolvedSolutes
-      ),
-      ChargeBalance: parseFloat(feedDataJson?.chargeBalance),
-      EstimatedConductivity: parseFloat(
-        feedDataJson?.estimatedConductivity
-      ),
-      Degas: 0.0,
-      percentage_of_initial_total_CO2_remaining: parseFloat(
-        feedDataJson?.percentContribution
-      ),
-      Equilibrate_with: 0.0,
-      Adjustment_Type: 0.0,
-      Add_Reagent: 0.0,
-      Total_CO2: 0.0,
-      cations: feedDataJson?.cations,
-      anions: feedDataJson?.anions,
-      neutrals: feedDataJson?.neutral,
-    }:reportData.ixReport.feeD_WATER;
+          // RegenProt_1_Ion_Conc_Leakage:
+          //   listProductQualityandregeneration[0]?.averageSpeciesVal,
+          // RegenProt_2_Ion_Conc_Leakage:
+          //   listProductQualityandregeneration[1]?.averageSpeciesVal,
+          RegenProt_1_Ion_Conc_Leakage: cationMeqlAvg,
+          RegenProt_2_Ion_Conc_Leakage: sio2MeqlAvg,
+          RegenProt_3_Ion_Conc_Leakage: 0,
+          RegenProt_1_Conductivity_Leakage: Number(
+            cationAverageConduc?.toFixed(2)
+          ),
+          RegenProt_2_Conductivity_Leakage: Number(
+            anionAverageConduc?.toFixed(2)
+          ),
+          RegenProt_3_Conductivity_Leakage: 0,
+          Organic_Adsorption_Efficiency: 0,
+          Organic_Adsorption_Efficiency_2: 0,
+          Organic_Adsorption_Efficiency_3: 0,
+          // RegenProt_1_Ion_Conc_Endpoint:
+          //   listProductQualityandregeneration[0]?.endpoingSpeciesVal,
+          // RegenProt_2_Ion_Conc_Endpoint:
+          //   listProductQualityandregeneration[1]?.endpoingSpeciesVal,
+          RegenProt_1_Ion_Conc_Endpoint: cationMeqlEnd,
+          RegenProt_2_Ion_Conc_Endpoint: sio2MeqlEnd,
+          RegenProt_3_Ion_Conc_Endpoint: 0,
+          RegenProt_1_Conductivity_Endpoint: Number(
+            cationendpointConduc?.toFixed(2)
+          ),
+          RegenProt_2_Conductivity_Endpoint: 0,
+          RegenProt_3_Conductivity_Endpoint: 0,
+          Diaminoethane_dose: 0, //It applies only to IXCP
+          Amino_2_methyl_1_propanol_dose: 0, //It applies only to IXCP
+          Methoxypropylamine_dose: 0, //It applies only to IXCP
+          Aminopentanol_dose: 0, //It applies only to IXCP
+          Cyclohexylamine_dose: 0, //It applies only to IXCP
+          Ethanolamine_dose: 0, //It applies only to IXCP
+          Morpholine_dose: 0, //It applies only to IXCP
+          Hydrazine_dose: 0, //It applies only to IXCP
+          Flow_net_product:
+            selectedEndNode == "startNode"
+              ? 0
+              : Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    productFlowRate,
+                    "m³/h",
+                    unit.selectedUnits[1]
+                  ).toFixed(3)
+                ),
+          //if product water than product water input needs to be send
+          TSS_IX_Input: parseFloat(feedDataJson?.tss), //feed water TSS iif IX is first unit operation.  If IX follows UF, RO, or another IX process, IX feed TSS = 0
+          flag_Vessel_Dimension_Units: selectedUnitbyUser,
+          Flag_RegenProt_1_Fast_Rinse_Source: fastRinseWater[0],
+          Flag_RegenProt_2_Fast_Rinse_Source: fastRinseWater[1],
+          Flag_RegenProt_3_Fast_Rinse_Source: 0,
+        }
+      : reportData.ixReport.maiN_INPUT;
+    const FEED_WATER = tabAvailable.FeedSetup
+      ? {
+          designTemp: StreamStoreData?.tempDesign,
+          methodname: "normal",
+          TOC_System_Feed: parseFloat(feedDataJson?.toc),
+          ph: parseFloat(feedDataJson?.pH),
+          TotalDissolvedSolutes: parseFloat(
+            feedDataJson?.totalDissolvedSolutes
+          ),
+          ChargeBalance: parseFloat(feedDataJson?.chargeBalance),
+          EstimatedConductivity: parseFloat(
+            feedDataJson?.estimatedConductivity
+          ),
+          Degas: 0.0,
+          percentage_of_initial_total_CO2_remaining: parseFloat(
+            feedDataJson?.percentContribution
+          ),
+          Equilibrate_with: 0.0,
+          Adjustment_Type: 0.0,
+          Add_Reagent: 0.0,
+          Total_CO2: 0.0,
+          cations: feedDataJson?.cations,
+          anions: feedDataJson?.anions,
+          neutrals: feedDataJson?.neutral,
+        }
+      : reportData.ixReport.feeD_WATER;
     const Myobject = {
-      userID: (tabAvailable.IXD||tabAvailable.FeedSetup)?userID:reportData.userID,
-      projectID: (tabAvailable.IXD||tabAvailable.FeedSetup)?projectID:reportData.projectID,
-      caseID: (tabAvailable.IXD||tabAvailable.FeedSetup)?caseID:reportData.caseID,
-      treatmentObjID: (tabAvailable.IXD||tabAvailable.FeedSetup)?treatmentObjID:reportData.treatmentObjID,
-      validDesignID: tabAvailable.IXD?validdesignID:reportData.validDesignID,
-      resinID1: tabAvailable.IXD?ixStoreResin1[0]?.ixResinID1:reportData.resinID1,
-      resinID2: tabAvailable.IXD?ixStoreResin1[0]?.ixResinID2:reportData.resinID2,
-      resinID3: tabAvailable.IXD?ixStoreResin2[0]?.ixResinID1:reportData.resinID3,
-      resinID4: tabAvailable.IXD?ixStoreResin2[0]?.ixResinID2:reportData.resinID4,
-      inertID1: tabAvailable.IXD?ixStoreResin1[0]?.inert:reportData.inertID1,
-      inertID2: tabAvailable.IXD?ixStoreResin2[0]?.inert:reportData.inertID2,
+      userID:
+        tabAvailable.IXD || tabAvailable.FeedSetup ? userID : reportData.userID,
+      projectID:
+        tabAvailable.IXD || tabAvailable.FeedSetup
+          ? projectID
+          : reportData.projectID,
+      caseID:
+        tabAvailable.IXD || tabAvailable.FeedSetup ? caseID : reportData.caseID,
+      treatmentObjID:
+        tabAvailable.IXD || tabAvailable.FeedSetup
+          ? treatmentObjID
+          : reportData.treatmentObjID,
+      validDesignID: tabAvailable.IXD
+        ? validdesignID
+        : reportData.validDesignID,
+      resinID1: tabAvailable.IXD
+        ? ixStoreResin1[0]?.ixResinID1
+        : reportData.resinID1,
+      resinID2: tabAvailable.IXD
+        ? ixStoreResin1[0]?.ixResinID2
+        : reportData.resinID2,
+      resinID3: tabAvailable.IXD
+        ? ixStoreResin2[0]?.ixResinID1
+        : reportData.resinID3,
+      resinID4: tabAvailable.IXD
+        ? ixStoreResin2[0]?.ixResinID2
+        : reportData.resinID4,
+      inertID1: tabAvailable.IXD
+        ? ixStoreResin1[0]?.inert
+        : reportData.inertID1,
+      inertID2: tabAvailable.IXD
+        ? ixStoreResin2[0]?.inert
+        : reportData.inertID2,
       inertID3: 0,
-      chemID_Regenerant1:
-      tabAvailable.IXD?(listRegenConds.length > 0 && listRegenConds[0]?.chemicalID):reportData.chemID_Regenerant1,
-      chemID_Regenerant2:
-      tabAvailable.IXD?(listRegenConds.length > 1 && listRegenConds[1]?.chemicalID):reportData.chemID_Regenerant2,
-      flag_waterblock: tabAvailable.IXD?water:reportData.flag_waterblock,
+      chemID_Regenerant1: tabAvailable.IXD
+        ? listRegenConds.length > 0 && listRegenConds[0]?.chemicalID
+        : reportData.chemID_Regenerant1,
+      chemID_Regenerant2: tabAvailable.IXD
+        ? listRegenConds.length > 1 && listRegenConds[1]?.chemicalID
+        : reportData.chemID_Regenerant2,
+      flag_waterblock: tabAvailable.IXD ? water : reportData.flag_waterblock,
       ixReport: {
-        MAIN_INPUT:MAIN_INPUT,
-        FEED_WATER:FEED_WATER,
+        MAIN_INPUT: MAIN_INPUT,
+        FEED_WATER: FEED_WATER,
         //feedwater true- const feedwater : slice feedwater
       },
     };
     console.log("PK before method");
     const MethodName = { Method: "ix/api/v1/DetailedReport" };
     const IxdDetailReport = { ...MethodName, ...Myobject };
-    console.log("PK IxdDetailReport",IxdDetailReport);
+    console.log("PK IxdDetailReport", IxdDetailReport);
     let postResponse = await POSTIXDJsonData(IxdDetailReport);
-    console.log("PK postResponse",postResponse);
-    if (postResponse.data) {
-      dispatch(setReportData(postResponse.data));
-      dispatch(setErrorReport(false));
-      // console.log(postResponse.data, "postResponseSave");
-    } else {
-      // console.log(postResponse.error, "postResponse");
-      dispatch(setErrorReport(true));
-      dispatch(
-        setErrorMessage({
-          ...errorMsgCode,
-          code: postResponse?.error?.status,
-          message: postResponse?.error?.data?.responseMessage,
-        })
-      );
-    }
+    // console.log("PK postResponse",postResponse);
+    // if (postResponse.data) {
+    //   dispatch(setReportData(postResponse.data));
+    //   dispatch(setErrorReport(false));
+    //   // console.log(postResponse.data, "postResponseSave");
+    // } else {
+    //   // console.log(postResponse.error, "postResponse");
+    //   dispatch(setErrorReport(true));
+    //   dispatch(
+    //     setErrorMessage({
+    //       ...errorMsgCode,
+    //       code: postResponse?.error?.status,
+    //       message: postResponse?.error?.data?.responseMessage,
+    //     })
+    //   );
+    // }
   };
 
   //----------------------------**IXD Report Section END**----------------------------------------
 
   //----------------------------**UF Report Section Start**----------------------------------------
-
 
   const modifiedData = (array) => {
     let tempData = [];
@@ -1553,25 +1599,39 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
     return camelCase;
   };
   const SaveUFJSONData = async () => {
-
-    console.log("techNolist1",DefaultUFstroe);
+    console.log("PK techNolist1", tabAvailableForUF);
     let activeUFModule = getModuleDetails(ufData.uFModuleID);
-    const Myobject = {
-      userID: ufData.userID,
-      projectID: ufData.projectID,
-      caseID: ProjectInfoStore?.caseId,
-      treatmentObjID: 1,
-      flux_Filter_actual: "0",
-      ufReport: {
-        method: "default",
-        exportReport: 0,
-        reportType: 3,
-        WaterTypeID: StreamStoreData?.waterTypeID,
-        WaterSubTypeID: StreamStoreData?.waterSubTypeID,
-        TechnologyId: 1,
-        Flow_Design:
-          // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
-          selectedEndNode == "startNode"
+    const userData = {
+      lstdefaultProjectUnits: modifiedData(unitConfig.defaultValues).filter(
+        (item) => item.isSelected
+      ),
+      reportProjectInfoVM: {
+        projectNumber: projectInfoVM.projectNumber,
+        projectName: projectInfoVM.projectName,
+        createDate: projectInfoVM.createdDate,
+        lastModified: projectInfoVM.updatedDate,
+        caseName: feedWaterData.projectCaseName,
+        preparedBy: projectInfoVM.designer,
+        designerCompany: projectInfoVM.designerCompany,
+        customer: projectInfoVM.customer,
+        countryName: countryData.find((item)=>item.countryID==projectInfoVM.countryID).countryName,
+        segmentName: projectInfoVM.marketsegmentName,
+        projectNotes: projectInfoVM.projectNotes,
+        exchangeRate: currencyConfig.selectedCurrency.currencyValue,
+        currencySymbol: currencyConfig.selectedCurrency.currencyUnit,
+        appVersion: appInfoVM.appVersion,
+      },
+      lstAllUOMs: modifiedData(unitConfig.defaultValues),
+      lstreportConversionFactors: uomData,
+    };
+    const ufReport1 = {
+      ...DefaultUFstore.ufReport,
+      WaterTypeID: StreamStoreData?.waterTypeID,
+      WaterSubTypeID: StreamStoreData?.waterSubTypeID,
+      TechnologyId: 1,
+      Flow_Design:
+        // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
+        selectedEndNode == "startNode"
           ? Number(
               GlobalUnitConversion(
                 GlobalUnitConversionStore,
@@ -1588,950 +1648,2061 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
                 unit.selectedUnits[1]
               ).toFixed(2)
             ),
-        Flag_Design_Flow: selectedEndNode == "startNode" ? 0 : 2,
-        // Flag_Design_Flow:2,
-        Guideline_number: StreamStoreData?.waterSubTypeID.toString(),
-        Temp_min: StreamStoreData?.tempMin,
-        Temp_design: StreamStoreData?.tempDesign,
-        Temp_max: StreamStoreData?.tempMax,
-        Recovery_Pretreat: ufData.strainerRecovery / 100,
-        Strainer_Size: ufData.strainerSize,
-        Recovery_RO: "0",
-        Feed_acid_name: "0",
-        Feed_acid_conc: "0",
-        Feed_acid_pH: feedDataJson?.pH.toString(),
-        Feed_coag_name: "0",
-        Feed_coag_conc: "0",
-        Feed_ox_name: "0",
-        Feed_ox_conc: "0",
-        N_Part_number: activeUFModule.moduleName,
-        N_Part_number_long: activeUFModule.newModuleLongName,
-        Company: "DuPont",
-        Drinking_water_part_names: activeUFModule.drinkingWaterInd
-          .toString()
-          .toUpperCase(),
-        // Drinking_water_part_names: "False",
-        IntegraPac: activeUFModule.integraPacInd.toString().toUpperCase(),
-        T_Rack: activeUFModule.tRack.toString().toUpperCase(),
-        Mem_Rack: activeUFModule.memRack.toString().toUpperCase(),
-        IntegraFlo: activeUFModule.integraFlowInd.toString().toUpperCase(),
-        Flux_Filter_target: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.filtrateFlux,
-            "LMH",
-            unit.selectedUnits[4]
-          ).toFixed(2)
+      Flag_Design_Flow: selectedEndNode == "startNode" ? 0 : 2,
+      // Flag_Design_Flow:2,
+      Guideline_number: StreamStoreData?.waterSubTypeID.toString(),
+      Temp_min: StreamStoreData?.tempMin,
+      Temp_design: StreamStoreData?.tempDesign,
+      Temp_max: StreamStoreData?.tempMax,
+      feed_water: {
+        designTemp: feedDataJson?.tempDesign,
+        methodname: "normal",
+        // TOC_System_Feed: parseFloat(feedDataJson?.toc),
+        ph: parseFloat(feedDataJson?.pH),
+        Degas: 0.0,
+        percentage_of_initial_total_CO2_remaining: parseFloat(
+          feedDataJson?.percentContribution
         ),
-        Flux_BW: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.backwashFlux,
-            "LMH",
-            unit.selectedUnits[4]
-          ).toFixed(2)
-        ),
-        Flux_CEB: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.cEBFlux,
-            "LMH",
-            unit.selectedUnits[4]
-          ).toFixed(2)
-        ),
-        Flow_FF: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.forwardFlushFlow,
-            "m³/h",
-            unit.selectedUnits[1]
-          ).toFixed(2)
-        ),
-        Flow_FF2: ufData.flow_FF2,
-        Flow_FF3: ufData.flow_FF3,
-        Flow_FF4: ufData.flow_FF4,
-        Flow_AS: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.airFlow,
-            "Nm³/h",
-            unit.selectedUnits[18]
-          ).toFixed(2)
-        ),
-        Flow_AS2: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.aerationAirFlow,
-            "Nm³/h",
-            unit.selectedUnits[18]
-          ).toFixed(2)
-        ),
-        Flow_mCIP_recycle: "0",
-        Flow_CIP_recycle: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.recycleFlowRate,
-            "m³/h",
-            unit.selectedUnits[1]
-          ).toFixed(2)
-        ),
-        Flag_cycle_input: "0",
-        t_filtration_cycle: ufData.backwash_design,
-        t_interval_AS: ufData.backwash_design,
-        t_interval_CEB_acid: ufData.acidCEB,
-        t_interval_CEB_caustic: ufData.alkaliOxidantCEB,
-        t_interval_CEB_Oxidant: "0",
-        t_interval_mCIP: "0",
-        t_interval_CIP: ufData.cIP,
-        t_MIT_module_day: ufData.offlinetimepertrain,
-        TMP_slope_BW: ufData.backwash_Filtration / 1000, //as per excel provided
-        TMP_slope_CEB1: ufData.acidCEB_Filtration / 1000, //as per excel provided
-        TMP_slope_CEB2: ufData.alkaliCEB_Filtration / 1000, //as per excel provided
-        TMP_slope_mCIP: "0", //as per excel provided
-        TMP_slope_CIP: ufData.cIP_Filtration / 1000, //as per excel provided
-        Standby_Option:
-          ufData.uFBWCEBStandbyOptionID == 1
-            ? "Constant operating flux, variable system output"
-            : "Constant system output, variable operating flux",
-        Flag_CIP_standby: ufData.uFBWCEBStandbyOptionID == 1 ? 0 : 2,
-        Flag_Storage_Tank: ufData.uFBWCEBStandbyOptionID == 1 ? 1 : 0,
-        N_Trains_online: ufData.onlineTrains,
-        N_Trains_standby: ufData.redundantStandbyTrains,
-        N_Trains_Redundant: ufData.redundantTrains,
-        N_Modules_per_Train: ufData.modulesPerTrain,
-        // N_Modules_per_Train: 34,
-        IP_Skids_train: activeUFModule.integraPacInd ? ufData.skidsPerTrain : 1,
-        IP_Mod_skid: activeUFModule.integraPacInd
-          ? ufData.modulesPerSkid
-          : ufData.modulesPerTrain,
-        Flag_BW: ufData.uFBWWaterTypeID - 1,
-        Flag_FF: ufData.uFBWFlushWaterTypeID - 1,
-        Flag_BW_Protocol: ufData.uFBWProtocolID == 1 ? 2 : 0,
-        Temp_BW: StreamStoreData?.tempDesign,
-        t_AS: ufData.backwash_AirScour / 60,
-        t_Drain: ufData.drain_backWash / 60,
-        t_BW1: ufData.backWash1_backWash / 60,
-        t_BW2: ufData.backWash2_backWash / 60,
-        t_FF: ufData.forwardFlush_backWash / 60,
-        t_LF: ufData.lF / 60,
-        t_FTL: ufData.t_FTL / 60,
-        BW_ox_name: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantID
-          ),
-          "symbol",
-          true
-        ), //////-----------------
-        BW_ox_conc: ufData.oxidantDosage,
-        Temp_CEB: StreamStoreData?.tempDesign,
-        Flag_CEB: ufData.uFCEBWaterTypeID,
-        t_AS_CEB: ufData.ceb_AirScour / 60,
-        t_Drain_CEB: ufData.drain / 60,
-        t_BW1_CEB: ufData.backWash1_CEB / 60,
-        t_BW2_CEB: ufData.backWash2_CEB / 60,
-        t_FF_CEB: ufData.forwardFlush / 60,
-        t_CEB_soak: ufData.chemicalSoakingDuration_CEB,
-        t_BW1_CEBrinse: ufData.t_CEB_Rinse12 / 60,
-        t_BW2_CEBrinse: ufData.t_CEB_Rinse2 / 60,
-        N_CEB_RScycles: "1",
-        CEB1_acid_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.mineralChemId
-            ),
-            "symbol",
-            true
-          )
-        ), //////-----------------
-        CEB1_acid_conc: ufData.mineralValueInPh_Ind ? 0 : ufData.mineralValue,
-        CEB1_acid_pH: ufData.mineralValueInPh_Ind ? ufData.mineralValue : 0,
-        CEB1_org_acid_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.organicChemId
-            ),
-            "chemicalName",
-            true
-          )
-        ), //////-----------------
-        CEB1_org_acid_conc: ufData.organicValue,
-        Flag_CEB1_Chem: "false",
-        CEB2_base_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.alkaliChemId
-            ),
-            "symbol",
-            true
-          )
-        ), //////-----------------
-        CEB2_base_conc: ufData.alkaliValueInPh_Ind ? 0 : ufData.alkaliValue,
-        CEB2_base_pH: ufData.alkaliValueInPh_Ind ? ufData.alkaliValue : 0,
-        CEB2_ox_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.oxidantChemId
-            ),
-            "symbol",
-            true
-          )
-        ), //////-----------------
-        CEB2_ox_conc: ufData.oxidantValue,
-        Flag_CEB2_Chem: "false",
-        CEB3_ox_name: "0", //////-----------------
-        CEB3_ox_conc: "0",
-        Temp_mCIP: "0",
-        N_BW_mCIP: "0",
-        N_BW_Rinse_mCIP: "0",
-        Flag_mCIP: "0",
-        t_mCIP_heat: "0",
-        t_mCIP_recycle: "0",
-        t_mCIP_soak: "0",
-        N_mCIP_RScycles: "0",
-        mCIP_acid_name: "0",
-        mCIP_acid_conc: "0",
-        mCIP_acid_pH: "0",
-        mCIP_org_acid_name: "0",
-        mCIP_org_acid_conc: "0",
-        Flag_mCIP1_Chem: "false",
-        mCIP_base_name: "0",
-        mCIP_base_conc: "0",
-        mCIP_base_pH: "0",
-        mCIP_ox_name: "0",
-        mCIP_ox_conc: "0",
-        mCIP_SLS_name: "0",
-        mCIP_SLS_conc: "0",
-        Flag_mCIP2_Chem: "0",
-        Temp_CIP: ufData.recycleTemperature,
-        N_BW_CIP: ufData.bWStepInCIP,
-        N_BW_Rinse_CIP: ufData.rinseBWCycle,
-        Flag_CIP: ufData.uFCIPWaterTypeID,
-        t_CIP_heat: ufData.heatingStepDuration,
-        t_CIP_recycle: ufData.recycleDuration,
-        t_CIP_soak: ufData.chemicalSoakingDuration_CIP,
-        N_CIP_RScycles: ufData.cIPRinseSoakCycle,
-        CIP_acid_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.mineralChemId_CIP
-            ),
-            "symbol",
-            true
-          )
-        ), //////-----------------
-        CIP_acid_conc: ufData.mineralValueInPh_Ind_CIP
-          ? 0
-          : ufData.mineralValue_CIP,
-        CIP_acid_pH: ufData.mineralValueInPh_Ind_CIP
-          ? ufData.mineralValue_CIP
-          : 0,
-        CIP_org_acid_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.organicChemId_CIP
-            ),
-            "chemicalName",
-            true
-          )
-        ), //////-----------------
-        CIP_org_acid_conc: ufData.organicValue_CIP,
-        CIP_N_Chem1_Flag: "false",
-        CIP_base_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.alkaliChemId_CIP
-            ),
-            "symbol",
-            true
-          )
-        ), //////-----------------
-        CIP_base_conc: ufData.alkaliValueInPh_Ind_CIP
-          ? 0
-          : ufData.alkaliValue_CIP,
-        CIP_base_pH: ufData.alkaliValueInPh_Ind_CIP
-          ? ufData.alkaliValue_CIP
-          : 0,
-        CIP_ox_name: changeChemicalFormat(
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.oxidantChemId_CIP
-            ),
-            "symbol",
-            true
-          )
-        ), //////-----------------
-        CIP_ox_conc: ufData.oxidantValue_CIP,
-        CIP_SLS_name: "0",
-        CIP_SLS_conc: "0",
-        CIP_N_Chem2_Flag: "false",
-        AdditionalSettingsScreen: "false",
-        P_air_max: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.maxAirScourPressure,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        P_ADBW_max: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.maxAirProcPressure,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        P_Filtrate: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.filteratePressure,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        Delta_P_piping_filtration: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.nonIntegraPacTrainPresDrop,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        Delta_P_strainer_filtration: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.integraPacFiltrationPreDrop,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        Delta_P_piping_BW: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.backwashPipingPreDrop,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        Delta_P_piping_mCIP: "0",
-        Delta_P_piping_CIP: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.cIPPipingPreDrop,
-            "bar",
-            unit.selectedUnits[3]
-          ).toFixed(2)
-        ),
-        StorageTankParameters: "0",
-        f_Chem_storage_days: ufData.chemicalStorageTime,
-        f_BW_tank_feed: ufData.bWTankRefillRate,
-        f_Filtrate_tank_safety_margin: ufData.filterateTank / 100,
-        f_BW_tank_safety_margin: ufData.bWTank / 100,
-        f_mCIP_tank: "0",
-        f_CIP_tank: ufData.cIPTank / 100,
-        f_ADBW: ufData?.aDBWDisplacement / 100,
-        f_FTL: ufData?.fTLDisplacement,
-        N_valves_per_skid: ufData.valvesPerTrain,
-        t_wait: ufData.typicalWaitDuration_Dupont / 60,
-        t_valve: ufData.valveOpenCloseDuration / 60,
-        t_ramp: ufData.typicalPumpRamp_Dupont,
-        Power_PLC: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.pLCPowerReqPertrain,
-            "kW",
-            unit.selectedUnits[9]
-          ).toFixed(2)
-        ),
-        Power_valve: Number(
-          GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            ufData.volvePowerReqPerTrain,
-            "kW",
-            unit.selectedUnits[9]
-          ).toFixed(2)
-        ),
-        ProjectLevelUserEntries: "0",
-        Eff_motor_feed: pumpCofig.pupmList.find((a) => a.pumpID == 53)
-          .motorEfficiency,
-        Eff_motor_BW: pumpCofig.pupmList.find((a) => a.pumpID == 54)
-          .motorEfficiency,
-        Eff_motor_mCIP: "0",
-        Eff_motor_CIP: pumpCofig.pupmList.find((a) => a.pumpID == 55)
-          .motorEfficiency,
-        Eff_motor_metering: pumpCofig.pupmList.find((a) => a.pumpID == 57)
-          .motorEfficiency,
-        Eff_motor_compressor: pumpCofig.pupmList.find((a) => a.pumpID == 56)
-          .motorEfficiency,
-        Eff_pump_feed: pumpCofig.pupmList.find((a) => a.pumpID == 53)
-          .pumpEfficiency,
-        Eff_pump_BW: pumpCofig.pupmList.find((a) => a.pumpID == 54)
-          .pumpEfficiency,
-        Eff_pump_mCIP: "0",
-        Eff_pump_CIP: pumpCofig.pupmList.find((a) => a.pumpID == 55)
-          .pumpEfficiency,
-        Eff_pump_metering: pumpCofig.pupmList.find((a) => a.pumpID == 57)
-          .pumpEfficiency,
-        Eff_compressor: pumpCofig.pupmList.find((a) => a.pumpID == 56)
-          .pumpEfficiency,
-        OperatingCostPrices: "0",
-        Price_Elec: chemicalConfig.operatingCost.electricity,
-        Price_Water: chemicalConfig.operatingCost.rawWater,
-        Price_Waste: chemicalConfig.operatingCost.wasteWaterDisposal,
-        // t_normal_module_cycle: "29.99999967",
-        // N_BW_per_AS: Number(
-        //   ufData.backwash_design / ufData.backwash_design + 0.5
-        // ),
-        // N_F_per_CEB1: "0",
-        // N_F_per_CEB2: "0",
-        // N_F_per_CEB3: "0",
-        // N_F_per_mCIP: "0",
-        // N_F_per_CIP: "0",
-        ...calculateData(),
-        N_Chem_CEB1: "1",
-        N_Chem_CEB2: "1",
-        N_Chem_CEB3: "1",
-        N_Chem_CIP: calculateCIP(),
-        N_Chem_mCIP: "0",
-        ModuleProperties: "0",
-        Area_Module: activeUFModule.moduleArea,
-        Vol_module: activeUFModule.v,
-        Length_module: activeUFModule.l,
-        Length_fibers: activeUFModule.fiberLength,
-        N_capillary: activeUFModule.bores,
-        N_Capillary_Ends: activeUFModule.ends,
-        D_ID: activeUFModule.dId,
-        D_OD: activeUFModule.dOd,
-        Av: activeUFModule.av,
-        P0: activeUFModule.p0,
-        S0: activeUFModule.s0,
-        S10: activeUFModule.s10,
-        S20: activeUFModule.s20,
-        S30: activeUFModule.s30,
-        S40: activeUFModule.s40,
-        Feed_acid_bulk_conc: "0",
-        Feed_acid_density: "0",
-        Feed_acid_price: "0",
-        Feed_coag_bulk_conc: "0",
-        Feed_coag_density: "0",
-        Feed_coag_price: "0",
-        Feed_ox_bulk_conc: "0",
-        Feed_ox_density: "0",
-        Feed_ox_price: "0",
-        BW_ox_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.oxidantID
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        BW_ox_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantID
-          ),
-          "bulkDensity",
-          false
-        ),
-        BW_ox_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantID
-          ),
-          "bulkPrice",
-          false
-        ),
-        CEB1_acid_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.mineralChemId
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CEB1_acid_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.mineralChemId
-          ),
-          "bulkDensity",
-          false
-        ),
-        CEB1_acid_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.mineralChemId
-          ),
-          "bulkPrice",
-          false
-        ),
-        CEB1_org_acid_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.organicChemId
-            ),
-            "bulkConcentration"
-          ) / 100,
-        CEB1_org_acid_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.organicChemId
-          ),
-          "bulkDensity",
-          false
-        ),
-        CEB1_org_acid_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.organicChemId
-          ),
-          "bulkPrice",
-          false
-        ),
-        CEB2_base_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.alkaliChemId
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CEB2_base_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.alkaliChemId
-          ),
-          "bulkDensity",
-          false
-        ),
-        CEB2_base_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.alkaliChemId
-          ),
-          "bulkPrice",
-          false
-        ),
-        CEB2_ox_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.oxidantChemId
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CEB2_ox_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantChemId
-          ),
-          "bulkDensity",
-          false
-        ),
-        CEB2_ox_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantChemId
-          ),
-          "bulkPrice",
-          false
-        ),
-        CEB3_ox_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.disOxidantChemId
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CEB3_ox_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.disOxidantChemId
-          ),
-          "bulkDensity",
-          false
-        ),
-        CEB3_ox_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.disOxidantChemId
-          ),
-          "bulkPrice",
-          false
-        ),
-        mCIP_acid_bulk_conc: "0",
-        mCIP_acid_density: "0",
-        mCIP_acid_price: "0",
-        mCIP_org_acid_bulk_conc: "0",
-        mCIP_org_acid_density: "0",
-        mCIP_org_acid_price: "0",
-        mCIP_base_bulk_conc: "0",
-        mCIP_base_density: "0",
-        mCIP_base_price: "0",
-        mCIP_ox_bulk_conc: "0",
-        mCIP_ox_density: "0",
-        mCIP_ox_price: "0",
-        mCIP_SLS_bulk_conc: "0",
-        mCIP_SLS_density: "0",
-        mCIP_SLS_price: "0",
-        CIP_acid_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.mineralChemId_CIP
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CIP_acid_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.mineralChemId_CIP
-          ),
-          "bulkDensity",
-          false
-        ),
-        CIP_acid_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.mineralChemId_CIP
-          ),
-          "bulkPrice",
-          false
-        ),
-        CIP_org_acid_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.organicChemId_CIP
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CIP_org_acid_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.organicChemId_CIP
-          ),
-          "bulkDensity",
-          false
-        ),
-        CIP_org_acid_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.organicChemId_CIP
-          ),
-          "bulkPrice",
-          false
-        ),
-        CIP_base_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.alkaliChemId_CIP
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CIP_base_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.alkaliChemId_CIP
-          ),
-          "bulkDensity",
-          false
-        ),
-        CIP_base_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.alkaliChemId_CIP
-          ),
-          "bulkPrice",
-          false
-        ),
-        CIP_ox_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.oxidantChemId_CIP
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CIP_ox_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantChemId_CIP
-          ),
-          "bulkDensity",
-          false
-        ),
-        CIP_ox_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidantChemId_CIP
-          ),
-          "bulkPrice",
-          false
-        ),
-        CIP_SLS_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.iD == ufData.oxidant2ChemId
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        CIP_SLS_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidant2ChemId
-          ),
-          "bulkDensity",
-          false
-        ),
-        CIP_SLS_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.iD == ufData.oxidant2ChemId
-          ),
-          "bulkPrice",
-          false
-        ),
-        Citric_Acid_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "Citric Acid(100)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        FeCl3_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "FeCl₃(100)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        H2SO4_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "H₂SO₄(98)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        HCl_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "HCl (32)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        NaOCl_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "NaOCl(12)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        NaOH_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "NaOH (50)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        Oxalic_Acid_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "Oxalic Acid(100)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        PACl_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "PACl(5)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        SLS_bulk_conc:
-          validData(
-            chemicalConfig.chemicalList.find(
-              (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
-            ),
-            "bulkConcentration",
-            false
-          ) / 100,
-        Citric_Acid_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "Citric Acid(100)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        FeCl3_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "FeCl₃(100)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        H2SO4_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "H₂SO₄(98)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        HCl_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "HCl (32)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        NaOCl_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "NaOCl(12)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        NaOH_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "NaOH (50)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        Oxalic_Acid_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "Oxalic Acid(100)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        PACl_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "PACl(5)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        SLS_density: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
-          ),
-          "bulkDensity",
-          false
-        ),
-        Citric_Acid_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "Citric Acid(100)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        FeCl3_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "FeCl₃(100)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        H2SO4_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "H₂SO₄(98)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        HCl_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "HCl (32)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        NaOCl_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "NaOCl(12)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        NaOH_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "NaOH (50)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        Oxalic_Acid_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "Oxalic Acid(100)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        PACl_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "PACl(5)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        SLS_price: validData(
-          chemicalConfig.chemicalList.find(
-            (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
-          ),
-          "bulkPrice",
-          false
-        ),
-        feed_water: {
-          designTemp: feedDataJson?.tempDesign,
-          methodname: "normal",
-          // TOC_System_Feed: parseFloat(feedDataJson?.toc),
-          ph: parseFloat(feedDataJson?.pH),
-          Degas: 0.0,
-          percentage_of_initial_total_CO2_remaining: parseFloat(
-            feedDataJson?.percentContribution
-          ),
-          Equilibrate_with: 0.0,
-          Adjustment_Type: 0.0,
-          Add_Reagent: 0.0,
-          Total_CO2: 0.0,
-          turbidity: feedDataJson?.turbidity,
-          organicToc: feedDataJson?.toc,
-          tss: feedDataJson?.tss,
-          tds: feedDataJson?.totalDissolvedSolutes,
-          cations: feedDataJson?.cations,
-          anions: feedDataJson?.anions,
-          neutrals: feedDataJson?.neutral,
-          LSI_targ: 0,
-          SDI_targ: 0,
-          ChemicalAdjustment: [
-            {
-              CaSO4_per: 0,
-              BaSO4_per: 0,
-              SrSO4_per: 0,
-              CaF2_per: 0,
-              SiO2_per: 0,
-              MgOH2_per: 0,
-              LSI: 0,
-              SDI: 0,
-            },
-          ],
-        },
+        Equilibrate_with: 0.0,
+        Adjustment_Type: 0.0,
+        Add_Reagent: 0.0,
+        Total_CO2: 0.0,
+        turbidity: feedDataJson?.turbidity,
+        organicToc: feedDataJson?.toc,
+        tss: feedDataJson?.tss,
+        tds: feedDataJson?.totalDissolvedSolutes,
+        cations: feedDataJson?.cations,
+        anions: feedDataJson?.anions,
+        neutrals: feedDataJson?.neutral,
+        LSI_targ: 0,
+        SDI_targ: 0,
+        ChemicalAdjustment: [
+          {
+            CaSO4_per: 0,
+            BaSO4_per: 0,
+            SrSO4_per: 0,
+            CaF2_per: 0,
+            SiO2_per: 0,
+            MgOH2_per: 0,
+            LSI: 0,
+            SDI: 0,
+          },
+        ],
       },
-      lstdefaultProjectUnits: modifiedData(unitConfig.defaultValues).filter(
-        (item) => item.isSelected
-      ),
-      reportProjectInfoVM: {
-        projectNumber: projectInfoVM.projectNumber,
-        projectName: projectInfoVM.projectName,
-        createDate: projectInfoVM.createdDate,
-        lastModified: projectInfoVM.updatedDate,
-        caseName: feedWaterData.projectCaseName,
-        preparedBy: projectInfoVM.designer,
-        designerCompany: projectInfoVM.designerCompany,
-        customer: projectInfoVM.customer,
-        countryName: projectInfoVM.customer,
-        segmentName: projectInfoVM.marketsegmentName,
-        projectNotes: projectInfoVM.projectNotes,
-        exchangeRate: currencyConfig.selectedCurrency.currencyValue,
-        currencySymbol: currencyConfig.selectedCurrency.currencyUnit,
-        appVersion: appInfoVM.appVersion,
-      },
-      lstAllUOMs: modifiedData(unitConfig.defaultValues),
-      lstreportConversionFactors: uomData,
     };
+    const MyObjectFeed = {
+      userID: DefaultUFstore.userID,
+      projectID: DefaultUFstore.projectID,
+      caseID: DefaultUFstore.caseID,
+      treatmentObjID: DefaultUFstore.treatmentObjID,
+      flux_Filter_actual: "0",
+      ufReport: ufReport1,
+      ...userData,
+    };
+
+    const Myobject =
+      tabAvailableForUF.UF === false && tabAvailableForUF.FeedSetup === false
+        ? {
+            ...DefaultUFstore,
+            ufReport: {
+              ...DefaultUFstore.ufReport,
+              Flow_Design:
+                // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
+                selectedEndNode == "startNode"
+                  ? Number(
+                      GlobalUnitConversion(
+                        GlobalUnitConversionStore,
+                        feedFlowRate,
+                        "m³/h",
+                        unit.selectedUnits[1]
+                      ).toFixed(2)
+                    )
+                  : Number(
+                      GlobalUnitConversion(
+                        GlobalUnitConversionStore,
+                        productFlowRate,
+                        "m³/h",
+                        unit.selectedUnits[1]
+                      ).toFixed(2)
+                    ),
+              Flag_Design_Flow: selectedEndNode == "startNode" ? 0 : 2,
+            },
+            ...userData,
+          }
+        : tabAvailableForUF.FeedSetup && tabAvailableForUF.UF === false
+        ? MyObjectFeed
+        : tabAvailableForUF.FeedSetup === false && tabAvailableForUF.UF
+        ? {
+            userID: DefaultUFstore.userID,
+            projectID: DefaultUFstore.projectID,
+            caseID: DefaultUFstore.caseID,
+            treatmentObjID: DefaultUFstore.treatmentObjID,
+            flux_Filter_actual: "0",
+            ufReport: {
+              ...{
+                method: "default",
+                exportReport: 0,
+                reportType: 3,
+                WaterTypeID: StreamStoreData?.waterTypeID,
+                WaterSubTypeID: StreamStoreData?.waterSubTypeID,
+                TechnologyId: 1,
+                Flow_Design:
+                  // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
+                  selectedEndNode == "startNode"
+                    ? Number(
+                        GlobalUnitConversion(
+                          GlobalUnitConversionStore,
+                          feedFlowRate,
+                          "m³/h",
+                          unit.selectedUnits[1]
+                        ).toFixed(2)
+                      )
+                    : Number(
+                        GlobalUnitConversion(
+                          GlobalUnitConversionStore,
+                          productFlowRate,
+                          "m³/h",
+                          unit.selectedUnits[1]
+                        ).toFixed(2)
+                      ),
+                Flag_Design_Flow: selectedEndNode == "startNode" ? 0 : 2,
+                // Flag_Design_Flow:2,
+                Guideline_number: StreamStoreData?.waterSubTypeID.toString(),
+                Temp_min: StreamStoreData?.tempMin,
+                Temp_design: StreamStoreData?.tempDesign,
+                Temp_max: StreamStoreData?.tempMax,
+                Recovery_Pretreat: ufData.strainerRecovery / 100,
+                Strainer_Size: ufData.strainerSize,
+                Recovery_RO: "0",
+                Feed_acid_name: "0",
+                Feed_acid_conc: "0",
+                Feed_acid_pH: feedDataJson?.pH.toString(),
+                Feed_coag_name: "0",
+                Feed_coag_conc: "0",
+                Feed_ox_name: "0",
+                Feed_ox_conc: "0",
+                N_Part_number: activeUFModule.moduleName,
+                N_Part_number_long: activeUFModule.newModuleLongName,
+                Company: "DuPont",
+                Drinking_water_part_names: activeUFModule.drinkingWaterInd
+                  .toString()
+                  .toUpperCase(),
+                // Drinking_water_part_names: "False",
+                IntegraPac: activeUFModule.integraPacInd
+                  .toString()
+                  .toUpperCase(),
+                T_Rack: activeUFModule.tRack.toString().toUpperCase(),
+                Mem_Rack: activeUFModule.memRack.toString().toUpperCase(),
+                IntegraFlo: activeUFModule.integraFlowInd
+                  .toString()
+                  .toUpperCase(),
+                Flux_Filter_target: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.filtrateFlux,
+                    "LMH",
+                    unit.selectedUnits[4]
+                  ).toFixed(2)
+                ),
+                Flux_BW: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.backwashFlux,
+                    "LMH",
+                    unit.selectedUnits[4]
+                  ).toFixed(2)
+                ),
+                Flux_CEB: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.cEBFlux,
+                    "LMH",
+                    unit.selectedUnits[4]
+                  ).toFixed(2)
+                ),
+                Flow_FF: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.forwardFlushFlow,
+                    "m³/h",
+                    unit.selectedUnits[1]
+                  ).toFixed(2)
+                ),
+                Flow_FF2: ufData.flow_FF2,
+                Flow_FF3: ufData.flow_FF3,
+                Flow_FF4: ufData.flow_FF4,
+                Flow_AS: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.airFlow,
+                    "Nm³/h",
+                    unit.selectedUnits[18]
+                  ).toFixed(2)
+                ),
+                Flow_AS2: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.aerationAirFlow,
+                    "Nm³/h",
+                    unit.selectedUnits[18]
+                  ).toFixed(2)
+                ),
+                Flow_mCIP_recycle: "0",
+                Flow_CIP_recycle: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.recycleFlowRate,
+                    "m³/h",
+                    unit.selectedUnits[1]
+                  ).toFixed(2)
+                ),
+                Flag_cycle_input: "0",
+                t_filtration_cycle: ufData.backwash_design,
+                t_interval_AS: ufData.backwash_design,
+                t_interval_CEB_acid: ufData.acidCEB,
+                t_interval_CEB_caustic: ufData.alkaliOxidantCEB,
+                t_interval_CEB_Oxidant: "0",
+                t_interval_mCIP: "0",
+                t_interval_CIP: ufData.cIP,
+                t_MIT_module_day: ufData.offlinetimepertrain,
+                TMP_slope_BW: ufData.backwash_Filtration / 1000, //as per excel provided
+                TMP_slope_CEB1: ufData.acidCEB_Filtration / 1000, //as per excel provided
+                TMP_slope_CEB2: ufData.alkaliCEB_Filtration / 1000, //as per excel provided
+                TMP_slope_mCIP: "0", //as per excel provided
+                TMP_slope_CIP: ufData.cIP_Filtration / 1000, //as per excel provided
+                Standby_Option:
+                  ufData.uFBWCEBStandbyOptionID == 1
+                    ? "Constant operating flux, variable system output"
+                    : "Constant system output, variable operating flux",
+                Flag_CIP_standby: ufData.uFBWCEBStandbyOptionID == 1 ? 0 : 2,
+                Flag_Storage_Tank: ufData.uFBWCEBStandbyOptionID == 1 ? 1 : 0,
+                N_Trains_online: ufData.onlineTrains,
+                N_Trains_standby: ufData.redundantStandbyTrains,
+                N_Trains_Redundant: ufData.redundantTrains,
+                N_Modules_per_Train: ufData.modulesPerTrain,
+                // N_Modules_per_Train: 34,
+                IP_Skids_train: activeUFModule.integraPacInd
+                  ? ufData.skidsPerTrain
+                  : 1,
+                IP_Mod_skid: activeUFModule.integraPacInd
+                  ? ufData.modulesPerSkid
+                  : ufData.modulesPerTrain,
+                Flag_BW: ufData.uFBWWaterTypeID - 1,
+                Flag_FF: ufData.uFBWFlushWaterTypeID - 1,
+                Flag_BW_Protocol: ufData.uFBWProtocolID == 1 ? 2 : 0,
+                Temp_BW: StreamStoreData?.tempDesign,
+                t_AS: ufData.backwash_AirScour / 60,
+                t_Drain: ufData.drain_backWash / 60,
+                t_BW1: ufData.backWash1_backWash / 60,
+                t_BW2: ufData.backWash2_backWash / 60,
+                t_FF: ufData.forwardFlush_backWash / 60,
+                t_LF: ufData.lF / 60,
+                t_FTL: ufData.t_FTL / 60,
+                BW_ox_name: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantID
+                  ),
+                  "symbol",
+                  true
+                ), //////-----------------
+                BW_ox_conc: ufData.oxidantDosage,
+                Temp_CEB: StreamStoreData?.tempDesign,
+                Flag_CEB: ufData.uFCEBWaterTypeID,
+                t_AS_CEB: ufData.ceb_AirScour / 60,
+                t_Drain_CEB: ufData.drain / 60,
+                t_BW1_CEB: ufData.backWash1_CEB / 60,
+                t_BW2_CEB: ufData.backWash2_CEB / 60,
+                t_FF_CEB: ufData.forwardFlush / 60,
+                t_CEB_soak: ufData.chemicalSoakingDuration_CEB,
+                t_BW1_CEBrinse: ufData.t_CEB_Rinse12 / 60,
+                t_BW2_CEBrinse: ufData.t_CEB_Rinse2 / 60,
+                N_CEB_RScycles: "1",
+                CEB1_acid_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.mineralChemId
+                    ),
+                    "symbol",
+                    true
+                  )
+                ), //////-----------------
+                CEB1_acid_conc: ufData.mineralValueInPh_Ind
+                  ? 0
+                  : ufData.mineralValue,
+                CEB1_acid_pH: ufData.mineralValueInPh_Ind
+                  ? ufData.mineralValue
+                  : 0,
+                CEB1_org_acid_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.organicChemId
+                    ),
+                    "chemicalName",
+                    true
+                  )
+                ), //////-----------------
+                CEB1_org_acid_conc: ufData.organicValue,
+                Flag_CEB1_Chem: "false",
+                CEB2_base_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.alkaliChemId
+                    ),
+                    "symbol",
+                    true
+                  )
+                ), //////-----------------
+                CEB2_base_conc: ufData.alkaliValueInPh_Ind
+                  ? 0
+                  : ufData.alkaliValue,
+                CEB2_base_pH: ufData.alkaliValueInPh_Ind
+                  ? ufData.alkaliValue
+                  : 0,
+                CEB2_ox_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.oxidantChemId
+                    ),
+                    "symbol",
+                    true
+                  )
+                ), //////-----------------
+                CEB2_ox_conc: ufData.oxidantValue,
+                Flag_CEB2_Chem: "false",
+                CEB3_ox_name: "0", //////-----------------
+                CEB3_ox_conc: "0",
+                Temp_mCIP: "0",
+                N_BW_mCIP: "0",
+                N_BW_Rinse_mCIP: "0",
+                Flag_mCIP: "0",
+                t_mCIP_heat: "0",
+                t_mCIP_recycle: "0",
+                t_mCIP_soak: "0",
+                N_mCIP_RScycles: "0",
+                mCIP_acid_name: "0",
+                mCIP_acid_conc: "0",
+                mCIP_acid_pH: "0",
+                mCIP_org_acid_name: "0",
+                mCIP_org_acid_conc: "0",
+                Flag_mCIP1_Chem: "false",
+                mCIP_base_name: "0",
+                mCIP_base_conc: "0",
+                mCIP_base_pH: "0",
+                mCIP_ox_name: "0",
+                mCIP_ox_conc: "0",
+                mCIP_SLS_name: "0",
+                mCIP_SLS_conc: "0",
+                Flag_mCIP2_Chem: "0",
+                Temp_CIP: ufData.recycleTemperature,
+                N_BW_CIP: ufData.bWStepInCIP,
+                N_BW_Rinse_CIP: ufData.rinseBWCycle,
+                Flag_CIP: ufData.uFCIPWaterTypeID,
+                t_CIP_heat: ufData.heatingStepDuration,
+                t_CIP_recycle: ufData.recycleDuration,
+                t_CIP_soak: ufData.chemicalSoakingDuration_CIP,
+                N_CIP_RScycles: ufData.cIPRinseSoakCycle,
+                CIP_acid_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.mineralChemId_CIP
+                    ),
+                    "symbol",
+                    true
+                  )
+                ), //////-----------------
+                CIP_acid_conc: ufData.mineralValueInPh_Ind_CIP
+                  ? 0
+                  : ufData.mineralValue_CIP,
+                CIP_acid_pH: ufData.mineralValueInPh_Ind_CIP
+                  ? ufData.mineralValue_CIP
+                  : 0,
+                CIP_org_acid_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.organicChemId_CIP
+                    ),
+                    "chemicalName",
+                    true
+                  )
+                ), //////-----------------
+                CIP_org_acid_conc: ufData.organicValue_CIP,
+                CIP_N_Chem1_Flag: "false",
+                CIP_base_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.alkaliChemId_CIP
+                    ),
+                    "symbol",
+                    true
+                  )
+                ), //////-----------------
+                CIP_base_conc: ufData.alkaliValueInPh_Ind_CIP
+                  ? 0
+                  : ufData.alkaliValue_CIP,
+                CIP_base_pH: ufData.alkaliValueInPh_Ind_CIP
+                  ? ufData.alkaliValue_CIP
+                  : 0,
+                CIP_ox_name: changeChemicalFormat(
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.oxidantChemId_CIP
+                    ),
+                    "symbol",
+                    true
+                  )
+                ), //////-----------------
+                CIP_ox_conc: ufData.oxidantValue_CIP,
+                CIP_SLS_name: "0",
+                CIP_SLS_conc: "0",
+                CIP_N_Chem2_Flag: "false",
+                AdditionalSettingsScreen: "false",
+                P_air_max: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.maxAirScourPressure,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                P_ADBW_max: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.maxAirProcPressure,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                P_Filtrate: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.filteratePressure,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                Delta_P_piping_filtration: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.nonIntegraPacTrainPresDrop,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                Delta_P_strainer_filtration: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.integraPacFiltrationPreDrop,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                Delta_P_piping_BW: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.backwashPipingPreDrop,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                Delta_P_piping_mCIP: "0",
+                Delta_P_piping_CIP: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.cIPPipingPreDrop,
+                    "bar",
+                    unit.selectedUnits[3]
+                  ).toFixed(2)
+                ),
+                StorageTankParameters: "0",
+                f_Chem_storage_days: ufData.chemicalStorageTime,
+                f_BW_tank_feed: ufData.bWTankRefillRate/100,
+                f_Filtrate_tank_safety_margin: ufData.filterateTank / 100,
+                f_BW_tank_safety_margin: ufData.bWTank / 100,
+                f_mCIP_tank: "0",
+                f_CIP_tank: ufData.cIPTank / 100,
+                f_ADBW: ufData?.aDBWDisplacement / 100,
+                f_FTL: ufData?.fTLDisplacement,
+                N_valves_per_skid: ufData.valvesPerTrain,
+                t_wait: ufData.typicalWaitDuration_Dupont / 60,
+                t_valve: ufData.valveOpenCloseDuration / 60,
+                t_ramp: ufData.typicalPumpRamp_Dupont,
+                Power_PLC: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.pLCPowerReqPertrain,
+                    "kW",
+                    unit.selectedUnits[9]
+                  ).toFixed(2)
+                ),
+                Power_valve: Number(
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
+                    ufData.volvePowerReqPerTrain,
+                    "kW",
+                    unit.selectedUnits[9]
+                  ).toFixed(2)
+                ),
+                ProjectLevelUserEntries: "0",
+                Eff_motor_feed: pumpCofig.pupmList.find((a) => a.pumpID == 53)
+                  .motorEfficiency,
+                Eff_motor_BW: pumpCofig.pupmList.find((a) => a.pumpID == 54)
+                  .motorEfficiency,
+                Eff_motor_mCIP: "0",
+                Eff_motor_CIP: pumpCofig.pupmList.find((a) => a.pumpID == 55)
+                  .motorEfficiency,
+                Eff_motor_metering: pumpCofig.pupmList.find(
+                  (a) => a.pumpID == 57
+                ).motorEfficiency,
+                Eff_motor_compressor: pumpCofig.pupmList.find(
+                  (a) => a.pumpID == 56
+                ).motorEfficiency,
+                Eff_pump_feed: pumpCofig.pupmList.find((a) => a.pumpID == 53)
+                  .pumpEfficiency,
+                Eff_pump_BW: pumpCofig.pupmList.find((a) => a.pumpID == 54)
+                  .pumpEfficiency,
+                Eff_pump_mCIP: "0",
+                Eff_pump_CIP: pumpCofig.pupmList.find((a) => a.pumpID == 55)
+                  .pumpEfficiency,
+                Eff_pump_metering: pumpCofig.pupmList.find(
+                  (a) => a.pumpID == 57
+                ).pumpEfficiency,
+                Eff_compressor: pumpCofig.pupmList.find((a) => a.pumpID == 56)
+                  .pumpEfficiency,
+                OperatingCostPrices: "0",
+                Price_Elec: chemicalConfig.operatingCost.electricity,
+                Price_Water: chemicalConfig.operatingCost.rawWater,
+                Price_Waste: chemicalConfig.operatingCost.wasteWaterDisposal,
+                // t_normal_module_cycle: "29.99999967",
+                // N_BW_per_AS: Number(
+                //   ufData.backwash_design / ufData.backwash_design + 0.5
+                // ),
+                // N_F_per_CEB1: "0",
+                // N_F_per_CEB2: "0",
+                // N_F_per_CEB3: "0",
+                // N_F_per_mCIP: "0",
+                // N_F_per_CIP: "0"
+                ...calculateData(),
+                N_Chem_CEB1: "1",
+                N_Chem_CEB2: "1",
+                N_Chem_CEB3: "1",
+                N_Chem_CIP: calculateCIP(),
+                N_Chem_mCIP: "0",
+                ModuleProperties: "0",
+                Area_Module: activeUFModule.moduleArea,
+                Vol_module: activeUFModule.v,
+                Length_module: activeUFModule.l,
+                Length_fibers: activeUFModule.fiberLength,
+                N_capillary: activeUFModule.bores,
+                N_Capillary_Ends: activeUFModule.ends,
+                D_ID: activeUFModule.dId,
+                D_OD: activeUFModule.dOd,
+                Av: activeUFModule.av,
+                P0: activeUFModule.p0,
+                S0: activeUFModule.s0,
+                S10: activeUFModule.s10,
+                S20: activeUFModule.s20,
+                S30: activeUFModule.s30,
+                S40: activeUFModule.s40,
+                Feed_acid_bulk_conc: "0",
+                Feed_acid_density: "0",
+                Feed_acid_price: "0",
+                Feed_coag_bulk_conc: "0",
+                Feed_coag_density: "0",
+                Feed_coag_price: "0",
+                Feed_ox_bulk_conc: "0",
+                Feed_ox_density: "0",
+                Feed_ox_price: "0",
+                BW_ox_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.oxidantID
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                BW_ox_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantID
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                BW_ox_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantID
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CEB1_acid_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.mineralChemId
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CEB1_acid_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CEB1_acid_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CEB1_org_acid_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.organicChemId
+                    ),
+                    "bulkConcentration"
+                  ) / 100,
+                CEB1_org_acid_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CEB1_org_acid_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CEB2_base_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.alkaliChemId
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CEB2_base_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CEB2_base_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CEB2_ox_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.oxidantChemId
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CEB2_ox_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CEB2_ox_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CEB3_ox_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.disOxidantChemId
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CEB3_ox_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.disOxidantChemId
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CEB3_ox_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.disOxidantChemId
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                mCIP_acid_bulk_conc: "0",
+                mCIP_acid_density: "0",
+                mCIP_acid_price: "0",
+                mCIP_org_acid_bulk_conc: "0",
+                mCIP_org_acid_density: "0",
+                mCIP_org_acid_price: "0",
+                mCIP_base_bulk_conc: "0",
+                mCIP_base_density: "0",
+                mCIP_base_price: "0",
+                mCIP_ox_bulk_conc: "0",
+                mCIP_ox_density: "0",
+                mCIP_ox_price: "0",
+                mCIP_SLS_bulk_conc: "0",
+                mCIP_SLS_density: "0",
+                mCIP_SLS_price: "0",
+                CIP_acid_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.mineralChemId_CIP
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CIP_acid_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId_CIP
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CIP_acid_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId_CIP
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CIP_org_acid_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.organicChemId_CIP
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CIP_org_acid_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId_CIP
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CIP_org_acid_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId_CIP
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CIP_base_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.alkaliChemId_CIP
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CIP_base_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId_CIP
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CIP_base_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId_CIP
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CIP_ox_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.oxidantChemId_CIP
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CIP_ox_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId_CIP
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CIP_ox_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId_CIP
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                CIP_SLS_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.iD == ufData.oxidant2ChemId
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                CIP_SLS_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidant2ChemId
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                CIP_SLS_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidant2ChemId
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                Citric_Acid_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "Citric Acid(100)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                FeCl3_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "FeCl₃(100)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                H2SO4_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "H₂SO₄(98)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                HCl_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "HCl (32)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                NaOCl_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "NaOCl(12)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                NaOH_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "NaOH (50)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                Oxalic_Acid_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "Oxalic Acid(100)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                PACl_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "PACl(5)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                SLS_bulk_conc:
+                  validData(
+                    chemicalConfig.chemicalList.find(
+                      (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
+                    ),
+                    "bulkConcentration",
+                    false
+                  ) / 100,
+                Citric_Acid_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "Citric Acid(100)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                FeCl3_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "FeCl₃(100)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                H2SO4_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "H₂SO₄(98)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                HCl_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "HCl (32)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                NaOCl_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "NaOCl(12)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                NaOH_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "NaOH (50)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                Oxalic_Acid_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "Oxalic Acid(100)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                PACl_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "PACl(5)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                SLS_density: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
+                  ),
+                  "bulkDensity",
+                  false
+                ),
+                Citric_Acid_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "Citric Acid(100)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                FeCl3_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "FeCl₃(100)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                H2SO4_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "H₂SO₄(98)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                HCl_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "HCl (32)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                NaOCl_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "NaOCl(12)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                NaOH_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "NaOH (50)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                Oxalic_Acid_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "Oxalic Acid(100)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                PACl_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "PACl(5)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                SLS_price: validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
+                  ),
+                  "bulkPrice",
+                  false
+                ),
+                feed_water: {
+                  designTemp: feedDataJson?.tempDesign,
+                  methodname: "normal",
+                  // TOC_System_Feed: parseFloat(feedDataJson?.toc),
+                  ph: parseFloat(feedDataJson?.pH),
+                  Degas: 0.0,
+                  percentage_of_initial_total_CO2_remaining: parseFloat(
+                    feedDataJson?.percentContribution
+                  ),
+                  Equilibrate_with: 0.0,
+                  Adjustment_Type: 0.0,
+                  Add_Reagent: 0.0,
+                  Total_CO2: 0.0,
+                  turbidity: feedDataJson?.turbidity,
+                  organicToc: feedDataJson?.toc,
+                  tss: feedDataJson?.tss,
+                  tds: feedDataJson?.totalDissolvedSolutes,
+                  cations: feedDataJson?.cations,
+                  anions: feedDataJson?.anions,
+                  neutrals: feedDataJson?.neutral,
+                  LSI_targ: 0,
+                  SDI_targ: 0,
+                  ChemicalAdjustment: [
+                    {
+                      CaSO4_per: 0,
+                      BaSO4_per: 0,
+                      SrSO4_per: 0,
+                      CaF2_per: 0,
+                      SiO2_per: 0,
+                      MgOH2_per: 0,
+                      LSI: 0,
+                      SDI: 0,
+                    },
+                  ],
+                },
+              },
+              WaterTypeID: DefaultUFstore.ufReport?.waterTypeID,
+              WaterSubTypeID: DefaultUFstore.ufReport?.waterSubTypeID,
+              TechnologyId: 1,
+              Flow_Design:
+                // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
+                selectedEndNode == "startNode"
+                  ? Number(
+                      GlobalUnitConversion(
+                        GlobalUnitConversionStore,
+                        feedFlowRate,
+                        "m³/h",
+                        unit.selectedUnits[1]
+                      ).toFixed(2)
+                    )
+                  : Number(
+                      GlobalUnitConversion(
+                        GlobalUnitConversionStore,
+                        productFlowRate,
+                        "m³/h",
+                        unit.selectedUnits[1]
+                      ).toFixed(2)
+                    ),
+              Flag_Design_Flow: selectedEndNode == "startNode" ? 0 : 2,
+              // Flag_Design_Flow:2,
+              Guideline_number: DefaultUFstore.ufReport?.Guideline_number,
+              Temp_min: DefaultUFstore.ufReport?.Temp_min,
+              Temp_design: DefaultUFstore.ufReport?.Temp_design,
+              Temp_max: DefaultUFstore.ufReport?.Temp_max,
+              feed_water: DefaultUFstore.ufReport?.feed_water,
+            },
+            ...userData,
+          }
+        : {
+            userID: ufData.userID,
+            projectID: ufData.projectID,
+            caseID: ProjectInfoStore?.caseId,
+            treatmentObjID: 1,
+            flux_Filter_actual: "0",
+            ufReport: {
+              method: "default",
+              exportReport: 0,
+              reportType: 3,
+              WaterTypeID: StreamStoreData?.waterTypeID,
+              WaterSubTypeID: StreamStoreData?.waterSubTypeID,
+              TechnologyId: 1,
+              Flow_Design:
+                // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
+                selectedEndNode == "startNode"
+                  ? Number(
+                      GlobalUnitConversion(
+                        GlobalUnitConversionStore,
+                        feedFlowRate,
+                        "m³/h",
+                        unit.selectedUnits[1]
+                      ).toFixed(2)
+                    )
+                  : Number(
+                      GlobalUnitConversion(
+                        GlobalUnitConversionStore,
+                        productFlowRate,
+                        "m³/h",
+                        unit.selectedUnits[1]
+                      ).toFixed(2)
+                    ),
+              Flag_Design_Flow: selectedEndNode == "startNode" ? 0 : 2,
+              // Flag_Design_Flow:2,
+              Guideline_number: StreamStoreData?.waterSubTypeID.toString(),
+              Temp_min: StreamStoreData?.tempMin,
+              Temp_design: StreamStoreData?.tempDesign,
+              Temp_max: StreamStoreData?.tempMax,
+              Recovery_Pretreat: ufData.strainerRecovery / 100,
+              Strainer_Size: ufData.strainerSize,
+              Recovery_RO: "0",
+              Feed_acid_name: "0",
+              Feed_acid_conc: "0",
+              Feed_acid_pH: feedDataJson?.pH.toString(),
+              Feed_coag_name: "0",
+              Feed_coag_conc: "0",
+              Feed_ox_name: "0",
+              Feed_ox_conc: "0",
+              N_Part_number: activeUFModule.moduleName,
+              N_Part_number_long: activeUFModule.newModuleLongName,
+              Company: "DuPont",
+              Drinking_water_part_names: activeUFModule.drinkingWaterInd
+                .toString()
+                .toUpperCase(),
+              // Drinking_water_part_names: "False",
+              IntegraPac: activeUFModule.integraPacInd.toString().toUpperCase(),
+              T_Rack: activeUFModule.tRack.toString().toUpperCase(),
+              Mem_Rack: activeUFModule.memRack.toString().toUpperCase(),
+              IntegraFlo: activeUFModule.integraFlowInd
+                .toString()
+                .toUpperCase(),
+              Flux_Filter_target: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.filtrateFlux,
+                  "LMH",
+                  unit.selectedUnits[4]
+                ).toFixed(2)
+              ),
+              Flux_BW: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.backwashFlux,
+                  "LMH",
+                  unit.selectedUnits[4]
+                ).toFixed(2)
+              ),
+              Flux_CEB: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.cEBFlux,
+                  "LMH",
+                  unit.selectedUnits[4]
+                ).toFixed(2)
+              ),
+              Flow_FF: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.forwardFlushFlow,
+                  "m³/h",
+                  unit.selectedUnits[1]
+                ).toFixed(2)
+              ),
+              Flow_FF2: ufData.flow_FF2,
+              Flow_FF3: ufData.flow_FF3,
+              Flow_FF4: ufData.flow_FF4,
+              Flow_AS: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.airFlow,
+                  "Nm³/h",
+                  unit.selectedUnits[18]
+                ).toFixed(2)
+              ),
+              Flow_AS2: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.aerationAirFlow,
+                  "Nm³/h",
+                  unit.selectedUnits[18]
+                ).toFixed(2)
+              ),
+              Flow_mCIP_recycle: "0",
+              Flow_CIP_recycle: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.recycleFlowRate,
+                  "m³/h",
+                  unit.selectedUnits[1]
+                ).toFixed(2)
+              ),
+              Flag_cycle_input: "0",
+              t_filtration_cycle: ufData.backwash_design,
+              t_interval_AS: ufData.backwash_design,
+              t_interval_CEB_acid: ufData.acidCEB,
+              t_interval_CEB_caustic: ufData.alkaliOxidantCEB,
+              t_interval_CEB_Oxidant: "0",
+              t_interval_mCIP: "0",
+              t_interval_CIP: ufData.cIP,
+              t_MIT_module_day: ufData.offlinetimepertrain,
+              TMP_slope_BW: ufData.backwash_Filtration / 1000, //as per excel provided
+              TMP_slope_CEB1: ufData.acidCEB_Filtration / 1000, //as per excel provided
+              TMP_slope_CEB2: ufData.alkaliCEB_Filtration / 1000, //as per excel provided
+              TMP_slope_mCIP: "0", //as per excel provided
+              TMP_slope_CIP: ufData.cIP_Filtration / 1000, //as per excel provided
+              Standby_Option:
+                ufData.uFBWCEBStandbyOptionID == 1
+                  ? "Constant operating flux, variable system output"
+                  : "Constant system output, variable operating flux",
+              Flag_CIP_standby: ufData.uFBWCEBStandbyOptionID == 1 ? 0 : 2,
+              Flag_Storage_Tank: ufData.uFBWCEBStandbyOptionID == 1 ? 1 : 0,
+              N_Trains_online: ufData.onlineTrains,
+              N_Trains_standby: ufData.redundantStandbyTrains,
+              N_Trains_Redundant: ufData.redundantTrains,
+              N_Modules_per_Train: ufData.modulesPerTrain,
+              // N_Modules_per_Train: 34,
+              IP_Skids_train: activeUFModule.integraPacInd
+                ? ufData.skidsPerTrain
+                : 1,
+              IP_Mod_skid: activeUFModule.integraPacInd
+                ? ufData.modulesPerSkid
+                : ufData.modulesPerTrain,
+              Flag_BW: ufData.uFBWWaterTypeID - 1,
+              Flag_FF: ufData.uFBWFlushWaterTypeID - 1,
+              Flag_BW_Protocol: ufData.uFBWProtocolID == 1 ? 2 : 0,
+              Temp_BW: StreamStoreData?.tempDesign,
+              t_AS: ufData.backwash_AirScour / 60,
+              t_Drain: ufData.drain_backWash / 60,
+              t_BW1: ufData.backWash1_backWash / 60,
+              t_BW2: ufData.backWash2_backWash / 60,
+              t_FF: ufData.forwardFlush_backWash / 60,
+              t_LF: ufData.lF / 60,
+              t_FTL: ufData.t_FTL / 60,
+              BW_ox_name: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantID
+                ),
+                "symbol",
+                true
+              ), //////-----------------
+              BW_ox_conc: ufData.oxidantDosage,
+              Temp_CEB: StreamStoreData?.tempDesign,
+              Flag_CEB: ufData.uFCEBWaterTypeID,
+              t_AS_CEB: ufData.ceb_AirScour / 60,
+              t_Drain_CEB: ufData.drain / 60,
+              t_BW1_CEB: ufData.backWash1_CEB / 60,
+              t_BW2_CEB: ufData.backWash2_CEB / 60,
+              t_FF_CEB: ufData.forwardFlush / 60,
+              t_CEB_soak: ufData.chemicalSoakingDuration_CEB,
+              t_BW1_CEBrinse: ufData.t_CEB_Rinse12 / 60,
+              t_BW2_CEBrinse: ufData.t_CEB_Rinse2 / 60,
+              N_CEB_RScycles: "1",
+              CEB1_acid_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId
+                  ),
+                  "symbol",
+                  true
+                )
+              ), //////-----------------
+              CEB1_acid_conc: ufData.mineralValueInPh_Ind
+                ? 0
+                : ufData.mineralValue,
+              CEB1_acid_pH: ufData.mineralValueInPh_Ind
+                ? ufData.mineralValue
+                : 0,
+              CEB1_org_acid_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId
+                  ),
+                  "chemicalName",
+                  true
+                )
+              ), //////-----------------
+              CEB1_org_acid_conc: ufData.organicValue,
+              Flag_CEB1_Chem: "false",
+              CEB2_base_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId
+                  ),
+                  "symbol",
+                  true
+                )
+              ), //////-----------------
+              CEB2_base_conc: ufData.alkaliValueInPh_Ind
+                ? 0
+                : ufData.alkaliValue,
+              CEB2_base_pH: ufData.alkaliValueInPh_Ind ? ufData.alkaliValue : 0,
+              CEB2_ox_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId
+                  ),
+                  "symbol",
+                  true
+                )
+              ), //////-----------------
+              CEB2_ox_conc: ufData.oxidantValue,
+              Flag_CEB2_Chem: "false",
+              CEB3_ox_name: "0", //////-----------------
+              CEB3_ox_conc: "0",
+              Temp_mCIP: "0",
+              N_BW_mCIP: "0",
+              N_BW_Rinse_mCIP: "0",
+              Flag_mCIP: "0",
+              t_mCIP_heat: "0",
+              t_mCIP_recycle: "0",
+              t_mCIP_soak: "0",
+              N_mCIP_RScycles: "0",
+              mCIP_acid_name: "0",
+              mCIP_acid_conc: "0",
+              mCIP_acid_pH: "0",
+              mCIP_org_acid_name: "0",
+              mCIP_org_acid_conc: "0",
+              Flag_mCIP1_Chem: "false",
+              mCIP_base_name: "0",
+              mCIP_base_conc: "0",
+              mCIP_base_pH: "0",
+              mCIP_ox_name: "0",
+              mCIP_ox_conc: "0",
+              mCIP_SLS_name: "0",
+              mCIP_SLS_conc: "0",
+              Flag_mCIP2_Chem: "0",
+              Temp_CIP: ufData.recycleTemperature,
+              N_BW_CIP: ufData.bWStepInCIP,
+              N_BW_Rinse_CIP: ufData.rinseBWCycle,
+              Flag_CIP: ufData.uFCIPWaterTypeID,
+              t_CIP_heat: ufData.heatingStepDuration,
+              t_CIP_recycle: ufData.recycleDuration,
+              t_CIP_soak: ufData.chemicalSoakingDuration_CIP,
+              N_CIP_RScycles: ufData.cIPRinseSoakCycle,
+              CIP_acid_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId_CIP
+                  ),
+                  "symbol",
+                  true
+                )
+              ), //////-----------------
+              CIP_acid_conc: ufData.mineralValueInPh_Ind_CIP
+                ? 0
+                : ufData.mineralValue_CIP,
+              CIP_acid_pH: ufData.mineralValueInPh_Ind_CIP
+                ? ufData.mineralValue_CIP
+                : 0,
+              CIP_org_acid_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId_CIP
+                  ),
+                  "chemicalName",
+                  true
+                )
+              ), //////-----------------
+              CIP_org_acid_conc: ufData.organicValue_CIP,
+              CIP_N_Chem1_Flag: "false",
+              CIP_base_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId_CIP
+                  ),
+                  "symbol",
+                  true
+                )
+              ), //////-----------------
+              CIP_base_conc: ufData.alkaliValueInPh_Ind_CIP
+                ? 0
+                : ufData.alkaliValue_CIP,
+              CIP_base_pH: ufData.alkaliValueInPh_Ind_CIP
+                ? ufData.alkaliValue_CIP
+                : 0,
+              CIP_ox_name: changeChemicalFormat(
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId_CIP
+                  ),
+                  "symbol",
+                  true
+                )
+              ), //////-----------------
+              CIP_ox_conc: ufData.oxidantValue_CIP,
+              CIP_SLS_name: "0",
+              CIP_SLS_conc: "0",
+              CIP_N_Chem2_Flag: "false",
+              AdditionalSettingsScreen: "false",
+              P_air_max: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.maxAirScourPressure,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              P_ADBW_max: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.maxAirProcPressure,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              P_Filtrate: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.filteratePressure,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              Delta_P_piping_filtration: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.nonIntegraPacTrainPresDrop,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              Delta_P_strainer_filtration: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.integraPacFiltrationPreDrop,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              Delta_P_piping_BW: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.backwashPipingPreDrop,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              Delta_P_piping_mCIP: "0",
+              Delta_P_piping_CIP: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.cIPPipingPreDrop,
+                  "bar",
+                  unit.selectedUnits[3]
+                ).toFixed(2)
+              ),
+              StorageTankParameters: "0",
+              f_Chem_storage_days: ufData.chemicalStorageTime,
+              f_BW_tank_feed: ufData.bWTankRefillRate/100,
+              f_Filtrate_tank_safety_margin: ufData.filterateTank / 100,
+              f_BW_tank_safety_margin: ufData.bWTank / 100,
+              f_mCIP_tank: "0",
+              f_CIP_tank: ufData.cIPTank / 100,
+              f_ADBW: ufData?.aDBWDisplacement / 100,
+              f_FTL: ufData?.fTLDisplacement,
+              N_valves_per_skid: ufData.valvesPerTrain,
+              t_wait: ufData.typicalWaitDuration_Dupont / 60,
+              t_valve: ufData.valveOpenCloseDuration / 60,
+              t_ramp: ufData.typicalPumpRamp_Dupont,
+              Power_PLC: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.pLCPowerReqPertrain,
+                  "kW",
+                  unit.selectedUnits[9]
+                ).toFixed(2)
+              ),
+              Power_valve: Number(
+                GlobalUnitConversion(
+                  GlobalUnitConversionStore,
+                  ufData.volvePowerReqPerTrain,
+                  "kW",
+                  unit.selectedUnits[9]
+                ).toFixed(2)
+              ),
+              ProjectLevelUserEntries: "0",
+              Eff_motor_feed: pumpCofig.pupmList.find((a) => a.pumpID == 53)
+                .motorEfficiency,
+              Eff_motor_BW: pumpCofig.pupmList.find((a) => a.pumpID == 54)
+                .motorEfficiency,
+              Eff_motor_mCIP: "0",
+              Eff_motor_CIP: pumpCofig.pupmList.find((a) => a.pumpID == 55)
+                .motorEfficiency,
+              Eff_motor_metering: pumpCofig.pupmList.find((a) => a.pumpID == 57)
+                .motorEfficiency,
+              Eff_motor_compressor: pumpCofig.pupmList.find(
+                (a) => a.pumpID == 56
+              ).motorEfficiency,
+              Eff_pump_feed: pumpCofig.pupmList.find((a) => a.pumpID == 53)
+                .pumpEfficiency,
+              Eff_pump_BW: pumpCofig.pupmList.find((a) => a.pumpID == 54)
+                .pumpEfficiency,
+              Eff_pump_mCIP: "0",
+              Eff_pump_CIP: pumpCofig.pupmList.find((a) => a.pumpID == 55)
+                .pumpEfficiency,
+              Eff_pump_metering: pumpCofig.pupmList.find((a) => a.pumpID == 57)
+                .pumpEfficiency,
+              Eff_compressor: pumpCofig.pupmList.find((a) => a.pumpID == 56)
+                .pumpEfficiency,
+              OperatingCostPrices: "0",
+              Price_Elec: chemicalConfig.operatingCost.electricity,
+              Price_Water: chemicalConfig.operatingCost.rawWater,
+              Price_Waste: chemicalConfig.operatingCost.wasteWaterDisposal,
+              // t_normal_module_cycle: "29.99999967",
+              // N_BW_per_AS: Number(
+              //   ufData.backwash_design / ufData.backwash_design + 0.5
+              // ),
+              // N_F_per_CEB1: "0",
+              // N_F_per_CEB2: "0",
+              // N_F_per_CEB3: "0",
+              // N_F_per_mCIP: "0",
+              // N_F_per_CIP: "0",
+              ...calculateData(),
+              N_Chem_CEB1: "1",
+              N_Chem_CEB2: "1",
+              N_Chem_CEB3: "1",
+              N_Chem_CIP: calculateCIP(),
+              N_Chem_mCIP: "0",
+              ModuleProperties: "0",
+              Area_Module: activeUFModule.moduleArea,
+              Vol_module: activeUFModule.v,
+              Length_module: activeUFModule.l,
+              Length_fibers: activeUFModule.fiberLength,
+              N_capillary: activeUFModule.bores,
+              N_Capillary_Ends: activeUFModule.ends,
+              D_ID: activeUFModule.dId,
+              D_OD: activeUFModule.dOd,
+              Av: activeUFModule.av,
+              P0: activeUFModule.p0,
+              S0: activeUFModule.s0,
+              S10: activeUFModule.s10,
+              S20: activeUFModule.s20,
+              S30: activeUFModule.s30,
+              S40: activeUFModule.s40,
+              Feed_acid_bulk_conc: "0",
+              Feed_acid_density: "0",
+              Feed_acid_price: "0",
+              Feed_coag_bulk_conc: "0",
+              Feed_coag_density: "0",
+              Feed_coag_price: "0",
+              Feed_ox_bulk_conc: "0",
+              Feed_ox_density: "0",
+              Feed_ox_price: "0",
+              BW_ox_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantID
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              BW_ox_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantID
+                ),
+                "bulkDensity",
+                false
+              ),
+              BW_ox_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantID
+                ),
+                "bulkPrice",
+                false
+              ),
+              CEB1_acid_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CEB1_acid_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.mineralChemId
+                ),
+                "bulkDensity",
+                false
+              ),
+              CEB1_acid_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.mineralChemId
+                ),
+                "bulkPrice",
+                false
+              ),
+              CEB1_org_acid_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId
+                  ),
+                  "bulkConcentration"
+                ) / 100,
+              CEB1_org_acid_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.organicChemId
+                ),
+                "bulkDensity",
+                false
+              ),
+              CEB1_org_acid_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.organicChemId
+                ),
+                "bulkPrice",
+                false
+              ),
+              CEB2_base_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CEB2_base_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.alkaliChemId
+                ),
+                "bulkDensity",
+                false
+              ),
+              CEB2_base_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.alkaliChemId
+                ),
+                "bulkPrice",
+                false
+              ),
+              CEB2_ox_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CEB2_ox_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantChemId
+                ),
+                "bulkDensity",
+                false
+              ),
+              CEB2_ox_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantChemId
+                ),
+                "bulkPrice",
+                false
+              ),
+              CEB3_ox_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.disOxidantChemId
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CEB3_ox_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.disOxidantChemId
+                ),
+                "bulkDensity",
+                false
+              ),
+              CEB3_ox_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.disOxidantChemId
+                ),
+                "bulkPrice",
+                false
+              ),
+              mCIP_acid_bulk_conc: "0",
+              mCIP_acid_density: "0",
+              mCIP_acid_price: "0",
+              mCIP_org_acid_bulk_conc: "0",
+              mCIP_org_acid_density: "0",
+              mCIP_org_acid_price: "0",
+              mCIP_base_bulk_conc: "0",
+              mCIP_base_density: "0",
+              mCIP_base_price: "0",
+              mCIP_ox_bulk_conc: "0",
+              mCIP_ox_density: "0",
+              mCIP_ox_price: "0",
+              mCIP_SLS_bulk_conc: "0",
+              mCIP_SLS_density: "0",
+              mCIP_SLS_price: "0",
+              CIP_acid_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.mineralChemId_CIP
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CIP_acid_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.mineralChemId_CIP
+                ),
+                "bulkDensity",
+                false
+              ),
+              CIP_acid_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.mineralChemId_CIP
+                ),
+                "bulkPrice",
+                false
+              ),
+              CIP_org_acid_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.organicChemId_CIP
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CIP_org_acid_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.organicChemId_CIP
+                ),
+                "bulkDensity",
+                false
+              ),
+              CIP_org_acid_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.organicChemId_CIP
+                ),
+                "bulkPrice",
+                false
+              ),
+              CIP_base_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.alkaliChemId_CIP
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CIP_base_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.alkaliChemId_CIP
+                ),
+                "bulkDensity",
+                false
+              ),
+              CIP_base_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.alkaliChemId_CIP
+                ),
+                "bulkPrice",
+                false
+              ),
+              CIP_ox_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidantChemId_CIP
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CIP_ox_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantChemId_CIP
+                ),
+                "bulkDensity",
+                false
+              ),
+              CIP_ox_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidantChemId_CIP
+                ),
+                "bulkPrice",
+                false
+              ),
+              CIP_SLS_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.iD == ufData.oxidant2ChemId
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              CIP_SLS_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidant2ChemId
+                ),
+                "bulkDensity",
+                false
+              ),
+              CIP_SLS_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.iD == ufData.oxidant2ChemId
+                ),
+                "bulkPrice",
+                false
+              ),
+              Citric_Acid_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "Citric Acid(100)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              FeCl3_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "FeCl₃(100)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              H2SO4_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "H₂SO₄(98)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              HCl_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "HCl (32)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              NaOCl_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "NaOCl(12)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              NaOH_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "NaOH (50)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              Oxalic_Acid_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "Oxalic Acid(100)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              PACl_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "PACl(5)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              SLS_bulk_conc:
+                validData(
+                  chemicalConfig.chemicalList.find(
+                    (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
+                  ),
+                  "bulkConcentration",
+                  false
+                ) / 100,
+              Citric_Acid_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "Citric Acid(100)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              FeCl3_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "FeCl₃(100)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              H2SO4_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "H₂SO₄(98)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              HCl_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "HCl (32)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              NaOCl_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "NaOCl(12)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              NaOH_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "NaOH (50)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              Oxalic_Acid_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "Oxalic Acid(100)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              PACl_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "PACl(5)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              SLS_density: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
+                ),
+                "bulkDensity",
+                false
+              ),
+              Citric_Acid_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "Citric Acid(100)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              FeCl3_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "FeCl₃(100)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              H2SO4_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "H₂SO₄(98)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              HCl_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "HCl (32)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              NaOCl_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "NaOCl(12)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              NaOH_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "NaOH (50)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              Oxalic_Acid_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "Oxalic Acid(100)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              PACl_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "PACl(5)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              SLS_price: validData(
+                chemicalConfig.chemicalList.find(
+                  (item) => item.displayName == "CH3(CH2)11SO4Na (100)"
+                ),
+                "bulkPrice",
+                false
+              ),
+              feed_water: {
+                designTemp: feedDataJson?.tempDesign,
+                methodname: "normal",
+                // TOC_System_Feed: parseFloat(feedDataJson?.toc),
+                ph: parseFloat(feedDataJson?.pH),
+                Degas: 0.0,
+                percentage_of_initial_total_CO2_remaining: parseFloat(
+                  feedDataJson?.percentContribution
+                ),
+                Equilibrate_with: 0.0,
+                Adjustment_Type: 0.0,
+                Add_Reagent: 0.0,
+                Total_CO2: 0.0,
+                turbidity: feedDataJson?.turbidity,
+                organicToc: feedDataJson?.toc,
+                tss: feedDataJson?.tss,
+                tds: feedDataJson?.totalDissolvedSolutes,
+                cations: feedDataJson?.cations,
+                anions: feedDataJson?.anions,
+                neutrals: feedDataJson?.neutral,
+                LSI_targ: 0,
+                SDI_targ: 0,
+                ChemicalAdjustment: [
+                  {
+                    CaSO4_per: 0,
+                    BaSO4_per: 0,
+                    SrSO4_per: 0,
+                    CaF2_per: 0,
+                    SiO2_per: 0,
+                    MgOH2_per: 0,
+                    LSI: 0,
+                    SDI: 0,
+                  },
+                ],
+              },
+            },
+            ...userData,
+          };
+
     const MethodName = { Method: "uf/api/v1/UFDetailedReport" };
-    const UFDetailReport = { ...MethodName, ...DefaultUFstroe };
+    console.log("PK MethodName,Myobject", MethodName, Myobject);
+    const UFDetailReport = { ...MethodName, ...Myobject };
     // const UFDetailReport = { ...MethodName, ...Myobject };
     let postResponse = await POSTUFJsonData(UFDetailReport);
     if (postResponse.data) {
@@ -3182,13 +4353,24 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
   const saveIXDData = async () => {
     var dummyListFinal = [];
     if (
-      ixStoreObj.viewReport === "true" &&
-      ixStore.evaluteExisting_ind == true
+      ixStoreObj.viewReport == "true"
+      // &&ixStore.evaluteExisting_ind == true
     ) {
+      console.log("PK in final 222");
+      // dummyListFinal=ixStoreObj?.listFinalParamAdj.map(obj=> {
+      //   let newObj={...obj};
+      //   delete obj.resinName;
+      //   return newObj;
+      // });
       dummyListFinal = ixStoreObj?.listFinalParamAdj;
-      // dummyListFinal = ixStoreObj?.existingPlantDescription;
+      
     } else {
-      // dummyListFinal = ixStoreObj?.listFinalParamAdj;
+      console.log("PK in exit 222");
+      // dummyListFinal=ixStoreObj?.existingPlantDescription.map(obj=> {
+      //   let newObj={...obj};
+      //   delete obj.resinName;
+      //   return newObj;
+      // });
       dummyListFinal = ixStoreObj?.existingPlantDescription;
     }
     console.log("PK dummyListFinal", dummyListFinal);
@@ -3230,7 +4412,7 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
         resinPackagingSize: 0,
         ixfpaRadioButtonID: 0,
       }));
-      if (vesselCount > 1) {
+      if (vesselCount < 1) {
         dummyListFinal = dummyArray;
       }
     }
@@ -3481,7 +4663,40 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
     // }
 
     /*----Unit conversion for Vessel Regeneration end-----*/
+    if(modeling!=="EvaluateExisting" || viewReport==false){
+      let vesselCount = ixStore.existingPlantDescription.length;
+      if (ixStoreObj.resinName4 !== null) {
+        vesselCount = 4;
+      } else if (ixStoreObj.resinName3 !== null) {
+        vesselCount = 3;
+      } else if (ixStoreObj.resinName2 !== null) {
+        vesselCount = 2;
+      } else {
+        vesselCount = 1;
+      }
+      var dummyArray1 = Array.from({ length: vesselCount }, (_, index) => ({
+        resinType: ixStoreObj.resinData[ixStoreObj[`resinName${index+1}`]],
+        resinName: ixStoreObj[`resinName${index+1}`],
+        resinId:ixStoreObj[`resinName${index+1}`]=="WAC"?ixResinID1:ixStoreObj[`resinName${index+1}`]=="SAC"?ixResinID2:ixStoreObj[`resinName${index+1}`]=="WBA"?ixResinID3:ixResinID4,
+        vesselNo: index + 1,
+        resinVolumeAsDelivered: 0,
+        vesselDiameter: 0,
+        resinBedHeightAsDelivered: 0,
+        resinBedStandardHeight: 0,
+        resinBedHeightAsExhausted: 0,
+        resinBedHeightAsRegenerated: 0,
+        inertResinVolume: 0,
+        inertBedHeight: 0,
+        freeBoard:0,
+        vesselCylindricalHeight: 0,
+        vesselWallThickness: 0,
+        pressureDropwithRecomQty: 0,
+        resinPackagingSize: 0,
+        ixfpaRadioButtonID: 0,
+      }));
+    }
     const MethodName = { Method: "ix/api/v1/IXData" };
+    console.log("PK 1 modelin",(viewReport==true),(viewReport=="true"),dummyListFinal,viewReport,modeling);
     const IXData_Method_Body = {
       ...MethodName,
       ...ixStore,
@@ -3528,8 +4743,7 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
           ["endpointConductivityVal"]: Number(anionendpointConduc?.toFixed(2)),
         },
       ],
-
-      listFinalParamAdj: dummyListFinal,
+      listFinalParamAdj: (viewReport=="true")?dummyListFinal:dummyArray1,
       treatmentName: "IXD",
     };
     let PostResponseValues = await IXData_PostData(IXData_Method_Body);
@@ -3550,157 +4764,188 @@ const ActivityMonitor = ({ setCurrentPanel }) => {
 
   //tab changing functions
   const changePanel = (tab, index) => {
-    if (validateTabChange(tab, index).canChange) {
-      if (selectedIndex === "System Design") {
-        if (!needToRetriveData) {
+    if (!isLoading) {
+      if (validateTabChange(tab, index).canChange) {
+        if (selectedIndex === "System Design") {
+          if (!needToRetriveData) {
+            changeTabsControler(tab, index);
+            updateDataFunction();
+          }
+        } else if (selectedIndex === "Feed Setup") {
+          if (FeedStreamData.lstrequestsavefeedwater[0].streams.length > 0) {
+            updateFeedsetDataFunction(tab, index);
+          }
+        } else if (selectedIndex === "UF") {
+          if (tab.heading !== "UF") {
+            saveUFData();
+          }
+
           changeTabsControler(tab, index);
-          updateDataFunction();
+        } else if (selectedIndex === "IXD") {
+          dispatch(
+            updateUFStore({
+              ...UFData,
+              ["isWaterSubTypeChanged"]: false,
+              ["isDesignTempChanged"]: false,
+            })
+          );
+          if (tab.heading !== "IXD") {
+            saveIXDData();
+          }
+          changeTabsControler(tab, index);
+        } else if (selectedIndex === "Report") {
+          dispatch(
+            updateUFStore({
+              ...UFData,
+              ["isWaterSubTypeChanged"]: false,
+              ["isDesignTempChanged"]: false,
+            })
+          );
+          changeTabsControler(tab, index);
         }
-      } else if (selectedIndex === "Feed Setup") {
-        if (FeedStreamData.lstrequestsavefeedwater[0].streams.length > 0) {
-          updateFeedsetDataFunction(tab, index);
-        }
-      } else if (selectedIndex === "UF") {
-        if (tab.heading !== "UF") {
-          saveUFData();
-        }
-
-        changeTabsControler(tab, index);
-      } else if (selectedIndex === "IXD") {
-        dispatch(
-          updateUFStore({
-            ...UFData,
-            ["isWaterSubTypeChanged"]: false,
-            ["isDesignTempChanged"]: false,
-          })
-        );
-        if (tab.heading !== "IXD") {
-          saveIXDData();
-        }
-        changeTabsControler(tab, index);
-      } else if (selectedIndex === "Report") {
-        dispatch(
-          updateUFStore({
-            ...UFData,
-            ["isWaterSubTypeChanged"]: false,
-            ["isDesignTempChanged"]: false,
-          })
-        );
-        changeTabsControler(tab, index);
       }
-    }
 
-    if (tab.heading === "Report") {
-console.log("techNolist",techNolist);
-
-      if (techNolist.includes("UF")) {
-        SaveUFJSONData();
-      } else if (techNolist.includes("IXD")) {
-        let list = [...existingPlantDescription];
-        var dummyReportListFinal = list.map((item, index) => {
-          let resinVolumeAsDelivered = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.resinVolumeAsDelivered,
-            "m³",
-            unit.selectedUnits[12]
-          );
-          let inertResinVolume = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.inertResinVolume,
-            "m³",
-            unit.selectedUnits[12]
-          );
-          let vesselDiameter = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.vesselDiameter,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let resinBedHeightAsDelivered = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.resinBedHeightAsDelivered,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let resinBedStandardHeight = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.resinBedStandardHeight,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let resinBedHeightAsRegenerated = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.resinBedHeightAsRegenerated,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let resinBedHeightAsExhausted = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.resinBedHeightAsExhausted,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let inertBedHeight = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.inertBedHeight,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let vesselCylindricalHeight = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.vesselCylindricalHeight,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          let vesselWallThickness = GlobalUnitConversion(
-            GlobalUnitConversionStore,
-            item.vesselWallThickness,
-            "mm",
-            unit.selectedUnits[8]
-          );
-          return {
-            ...item,
-            ["resinVolumeAsDelivered"]: Number.parseFloat(
-              resinVolumeAsDelivered
-            ).toFixed(2),
-            ["inertResinVolume"]:
-              Number.parseFloat(inertResinVolume).toFixed(2),
-            ["vesselDiameter"]: Number.parseFloat(vesselDiameter).toFixed(2),
-            ["resinBedHeightAsDelivered"]: Number.parseFloat(
-              resinBedHeightAsDelivered
-            ).toFixed(2),
-            ["resinBedStandardHeight"]: Number.parseFloat(
-              resinBedStandardHeight
-            ).toFixed(2),
-            ["resinBedHeightAsRegenerated"]: Number.parseFloat(
-              resinBedHeightAsRegenerated
-            ).toFixed(2),
-            ["resinBedHeightAsExhausted"]: Number.parseFloat(
-              resinBedHeightAsExhausted
-            ).toFixed(2),
-            ["inertBedHeight"]: Number.parseFloat(inertBedHeight).toFixed(2),
-            ["vesselCylindricalHeight"]: Number.parseFloat(
-              vesselCylindricalHeight
-            ).toFixed(2),
-            ["vesselWallThickness"]:
-              Number.parseFloat(vesselWallThickness).toFixed(2),
-          };
-        });
-        SaveIXDJSONData(dummyReportListFinal);
-      }
-      if (technologyAdded !== true) {
-        setIsReportError(true);
-        setSelectedIndex("System Design");
-        setPanelIndex(0);
-        setCurrentPanel("System Design");
-        setScrollCheck(!scrollCheck);
-      } else {
-        changeTabsControler(tab, index);
+      if (tab.heading === "Report" ) {
+        if (techNolist.includes("UF") && !ufReportLoading) {
+          SaveUFJSONData();
+        } else if (techNolist.includes("IXD")) {
+          var list = [...existingPlantDescription];
+          if(modeling!=="EvaluateExisting" || viewReport==false){
+            let vesselCount = ixStore.existingPlantDescription.length;
+            if (ixStoreObj.resinName4 !== null) {
+              vesselCount = 4;
+            } else if (ixStoreObj.resinName3 !== null) {
+              vesselCount = 3;
+            } else if (ixStoreObj.resinName2 !== null) {
+              vesselCount = 2;
+            } else {
+              vesselCount = 1;
+            }
+            var dummyArray = Array.from({ length: vesselCount }, (_, index) => ({
+              resinType: ixStoreObj.resinData[ixStoreObj[`resinName${index+1}`]],
+              resinName: ixStoreObj[`resinName${index+1}`],
+              resinId:ixStoreObj[`resinName${index+1}`]=="WAC"?ixResinID1:ixStoreObj[`resinName${index+1}`]=="SAC"?ixResinID2:ixStoreObj[`resinName${index+1}`]=="WBA"?ixResinID3:ixResinID4,
+              vesselNo: index + 1,
+              resinVolumeAsDelivered: 0,
+              vesselDiameter: 0,
+              resinBedHeightAsDelivered: 0,
+              resinBedStandardHeight: 0,
+              resinBedHeightAsExhausted: 0,
+              resinBedHeightAsRegenerated: 0,
+              inertResinVolume: 0,
+              inertBedHeight: 0,
+              freeBoard:0,
+              vesselCylindricalHeight: 0,
+              vesselWallThickness: 0,
+              pressureDropwithRecomQty: 0,
+              resinPackagingSize: 0,
+              ixfpaRadioButtonID: 0,
+            }));
+            list=dummyArray;
+          }
+          var dummyReportListFinal = list.map((item, index) => {
+            let resinVolumeAsDelivered = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.resinVolumeAsDelivered,
+              "m³",
+              unit.selectedUnits[12]
+            );
+            let inertResinVolume = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.inertResinVolume,
+              "m³",
+              unit.selectedUnits[12]
+            );
+            let vesselDiameter = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.vesselDiameter,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let resinBedHeightAsDelivered = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.resinBedHeightAsDelivered,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let resinBedStandardHeight = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.resinBedStandardHeight,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let resinBedHeightAsRegenerated = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.resinBedHeightAsRegenerated,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let resinBedHeightAsExhausted = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.resinBedHeightAsExhausted,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let inertBedHeight = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.inertBedHeight,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let vesselCylindricalHeight = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.vesselCylindricalHeight,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            let vesselWallThickness = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              item.vesselWallThickness,
+              "mm",
+              unit.selectedUnits[8]
+            );
+            return {
+              ...item,
+              ["resinVolumeAsDelivered"]: Number.parseFloat(
+                resinVolumeAsDelivered
+              ).toFixed(2),
+              ["inertResinVolume"]:
+                Number.parseFloat(inertResinVolume).toFixed(2),
+              ["vesselDiameter"]: Number.parseFloat(vesselDiameter).toFixed(2),
+              ["resinBedHeightAsDelivered"]: Number.parseFloat(
+                resinBedHeightAsDelivered
+              ).toFixed(2),
+              ["resinBedStandardHeight"]: Number.parseFloat(
+                resinBedStandardHeight
+              ).toFixed(2),
+              ["resinBedHeightAsRegenerated"]: Number.parseFloat(
+                resinBedHeightAsRegenerated
+              ).toFixed(2),
+              ["resinBedHeightAsExhausted"]: Number.parseFloat(
+                resinBedHeightAsExhausted
+              ).toFixed(2),
+              ["inertBedHeight"]: Number.parseFloat(inertBedHeight).toFixed(2),
+              ["vesselCylindricalHeight"]: Number.parseFloat(
+                vesselCylindricalHeight
+              ).toFixed(2),
+              ["vesselWallThickness"]:
+                Number.parseFloat(vesselWallThickness).toFixed(2),
+            };
+          });
+          SaveIXDJSONData(dummyReportListFinal);
+        }
+        if (technologyAdded !== true) {
+          setIsReportError(true);
+          setSelectedIndex("System Design");
+          setPanelIndex(0);
+          setCurrentPanel("System Design");
+          setScrollCheck(!scrollCheck);
+        } else {
+          changeTabsControler(tab, index);
+        }
       }
     }
   };
-
-
 
   const validateTabChange = (tab, index) => {
     switch (tab.heading) {
@@ -3730,16 +4975,20 @@ console.log("techNolist",techNolist);
     }
   };
   const changeTabsControler = (tab, index) => {
-    if(tab.heading ==="Feed Setup"){
-      dispatch(updateTabAvailable({...tabAvailable,"FeedSetup":true}));
-    }else if(tab.heading ==="IXD"){
-      dispatch(updateTabAvailable({...tabAvailable,"IXD":true}));
+    if (tab.heading === "Feed Setup") {
+      dispatch(updateTabAvailable({ ...tabAvailable, FeedSetup: true }));
+      dispatch(
+        updateTabAvailableForUF({ ...tabAvailableForUF, FeedSetup: true })
+      );
+    } else if (tab.heading === "IXD") {
+      dispatch(updateTabAvailable({ ...tabAvailable, IXD: true }));
+    } else if (tab.heading === "UF") {
+      dispatch(updateTabAvailableForUF({ ...tabAvailableForUF, UF: true }));
     }
-      setSelectedIndex(tab.heading);
-      setPanelIndex(index);
-      setCurrentPanel(tab.heading);
-      setScrollCheck(!scrollCheck);
-
+    setSelectedIndex(tab.heading);
+    setPanelIndex(index);
+    setCurrentPanel(tab.heading);
+    setScrollCheck(!scrollCheck);
   };
 
   // const changeTabsControler = (tab, index) => {
@@ -3753,16 +5002,12 @@ console.log("techNolist",techNolist);
   //   //   dispatch(updateTabAvailableForUF({...tabAvailableForUF,"UF":true}));
   //   // }
 
-    
   //     setSelectedIndex(tab.heading);
   //     setPanelIndex(index);
   //     setCurrentPanel(tab.heading);
   //     setScrollCheck(!scrollCheck);
- 
+
   // };
-
-
-
 
   const handleTabClick = (tabIndex) => {
     if (

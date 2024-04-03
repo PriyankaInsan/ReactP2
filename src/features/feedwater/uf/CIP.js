@@ -292,13 +292,15 @@ const CIP = () => {
       };
       handleInputChange(transferData);
     } else if (id !== "waterType") {
-      let chemData = showInDropDown.find((chem) => chem.iD == value);
+      let chemData = [...chemicalType.mineral,...chemicalType.alkali,...chemicalType.organic,...chemicalType.oxidant].find((chem) => chem.id == value);
+       chemData = showInDropDown.find((chem) => chem.displayName == chemData.displayName);
       let chemicalValue = ufDoseGuidline.find(
         (item) =>
           item.waterSubTypeId == waterSubTypeID &&
-          item.symbol == chemData.symbol &&
+          item?.symbol == chemData?.symbol &&
           item.guidelineName.includes("CIP")
       );
+      
 
       if (id == "mineral") {
         let mineralTempValue = chemicalValue ? chemicalValue.targetDose : 550;

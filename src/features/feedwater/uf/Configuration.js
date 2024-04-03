@@ -158,6 +158,7 @@ const Configuration = () => {
     (state) => state.projectInfo?.projectConfig?.unitConfig
   );
   const {unitTypeFlux,unitFlag} = useSelector((state) => state.GUnitConversion);
+
   useEffect(() => {
     document.body.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -165,12 +166,21 @@ const Configuration = () => {
     };
   }, []);
 
+  /* getOperatingFluxFromCalcEngine called on input change */
+  useEffect(()=>{
+    console.log("getOperatingFluxFromCalcEngine called on input change");
+    setTimeout(() => {
+      getOperatingFluxFromCalcEngine();
+    },3000);
+  },[UFData.totalModules]);
+
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       setIsFieldValid(false);
     }
   };
 
+  /* Generate Table called on page load */
   useEffect(() => {
     if (uFBWCEBStandbyOptionID == "0") {
       dispatch(updateUFStore({ ...UFData, ["uFBWCEBStandbyOptionID"]: "1" }));
@@ -186,7 +196,6 @@ const Configuration = () => {
     const activeModuleDetails = getModuleDetails(UFData.uFModuleID);
     dispatch(updateActiveUFModule(activeModuleDetails));
     //calls calcengine api and generate table, sets first configuration as default config
-  
     handleUFConfigAPICall(uFBWCEBStandbyOptionID, activeModuleDetails);
     dispatch(calculateUFFields());
   }, []);
@@ -215,15 +224,11 @@ const Configuration = () => {
     }
   }, [UFStore.isForDrinkingWater]);
 
+  /* getOperatingFluxFromCalcEngine called on config change or selection */
   useEffect(() => {
     if (callCalcEngineUFConfig) {
       //CALL UFCONFIG API FOR GETTING LATEST VALUE FOR - "OperatingFlux(flux_Filter_actual)"
-      const activeModuleDetails = getModuleDetails(UFData.uFModuleID);
-      const ufConfigPayload = getUFConfigPayload(activeModuleDetails);
-      callUFConfigAndUpdateOperatingFlux({
-        ...ufConfigPayload,
-        standBy: UFData.uFBWCEBStandbyOptionID,
-      });
+      getOperatingFluxFromCalcEngine();
     }
   }, [callCalcEngineUFConfig]);
 
@@ -411,6 +416,7 @@ const Configuration = () => {
     }
   };
 
+  /* Generate Table based on Module Selection */
   const setActiveUFModuleInStore = (moduleID) => {
     const activeModuleDetails = getModuleDetails(moduleID);
     dispatch(updateActiveUFModule(activeModuleDetails));
@@ -429,6 +435,8 @@ const Configuration = () => {
     setModuleBasedInputRangeConfigs(activeModuleDetails);
    
     handleUFConfigAPICall(UFData.uFBWCEBStandbyOptionID, activeModuleDetails);
+    dispatch(calculateUFFields());
+
   };
 
   const changeChemicalFormat = (chemicalSymbol) => {
@@ -587,6 +595,7 @@ const Configuration = () => {
       t_normal_module_cycle: t_normal_module_cycle.toString(),
     };
   };
+
   const calculateCIP = () => {
     const getFirstData = () => {
       if (UFData.mineralValue_CIP == 0 && UFData.organicValue_CIP == 0) {
@@ -629,6 +638,15 @@ const Configuration = () => {
   const getUFConfigPayload = (activeModuleDetails) => {
     // console.log("On Page load : activeModuleDetails",activeModuleDetails);
     // console.log("On Page load :activeUFModule from store",activeUFModule);
+    // console.log("$$$$$$$$$$ 4 getUFConfigPayload : Payload setting with below after calculatingUFFields");
+    // console.log("Rack/Unit",UFData.skidsPerTrain);
+    // console.log("Modules/Rack",UFData.modulesPerSkid);
+    // console.log("Online Trains",UFData.onlineTrains);
+    // console.log("StandBy Trains",UFData.redundantStandbyTrains);
+    // console.log("Redudant Trains",UFData.redundantTrains);
+    // console.log("Module/Unit",UFData.modulesPerTrain);
+    // console.log("Total Modules",UFData.totalModules);
+    // console.log("******************************************************* ");
     let ufReport = {
       method: "default",
       exportReport: 0,
@@ -637,9 +655,24 @@ const Configuration = () => {
       WaterSubTypeID: StreamStoreData?.waterSubTypeID.toString(),
       TechnologyId: 1,
       Flow_Design:
-        selectedEndNode == "startNode"
-          ? feedFlowRate.toString()
-          : productFlowRate.toString(),
+          // selectedEndNode == "startNode" ? feedFlowRate : productFlowRate,
+          selectedEndNode == "startNode"
+          ? Number(
+              GlobalUnitConversion(
+                GlobalUnitConversionStore,
+                feedFlowRate,
+                "m³/h",
+                unit.selectedUnits[1]
+              ).toFixed(2)
+            ).toString()
+          : Number(
+              GlobalUnitConversion(
+                GlobalUnitConversionStore,
+                productFlowRate,
+                "m³/h",
+                unit.selectedUnits[1]
+              ).toFixed(2)
+            ).toString(),
       Flag_Design_Flow: selectedEndNode == "startNode" ? "0" : "2",
       // Flag_Design_Flow:2,
       Guideline_number: StreamStoreData?.waterSubTypeID.toString(),
@@ -703,7 +736,7 @@ const Configuration = () => {
       N_Trains_Redundant: UFData.redundantTrains.toString(),
       N_Modules_per_Train: UFData.modulesPerTrain.toString(),
       // N_Modules_per_Train: 34,
-      IP_Skids_train: activeUFModule.integraPacInd ? UFData.skids.toString() : "1",
+      IP_Skids_train: activeUFModule.integraPacInd ? UFData.skidsPerTrain.toString() : "1",
       IP_Mod_skid: activeModuleDetails.integraPacInd
       ? UFData.modulesPerSkid.toString()
       : UFData.modulesPerTrain.toString(),
@@ -1422,6 +1455,7 @@ const Configuration = () => {
     return payload;
   };
 
+  /* Called inside handleUFConfigAPICall */
   const handleCalcEngineAPICall = (a, activeModuleDetails) => {
     // console.log("activeUFModule -- STORE",activeUFModule);
     // console.log("activeModuleDetails as param",activeModuleDetails);
@@ -1433,28 +1467,29 @@ const Configuration = () => {
         activeModuleName: activeModuleDetails?.newModuleLongName,
       });
   };
-
+  /* Called inside getOperatingFluxFromCalcEngine */
   const callUFConfigAndUpdateOperatingFlux = async (ufConfigPayload) => {
     const MethodName = {
       Method: "uf/api/v1/UFConfig",
     };
     const UFRequestDetails = { ...MethodName, ...ufConfigPayload };
-    let calcEngineResponse = await getData(UFRequestDetails);
-    if (calcEngineResponse?.data?.statusCode == "OK") {
-      if (calcEngineResponse?.data?.responseConfigVM !== undefined) {
-        const response=calcEngineResponse?.data?.responseConfigVM;
-        if(unit.selectedUnits[4]!=="LMH"){
-          const fluxData=GlobalUnitConversion(GlobalUnitConversionStore,calcEngineData.flux_Filter_actual,unit.selectedUnits[4],unitTypeFlux);
-          dispatch(handleCalcEngineResponse({...response,["flux_Filter_actual"]:fluxData}));
+      let calcEngineResponse = await getData(UFRequestDetails);
+      if (calcEngineResponse?.data?.statusCode == "OK") {
+        if (calcEngineResponse?.data?.responseConfigVM !== undefined) {
+          const response=calcEngineResponse?.data?.responseConfigVM;
+          if(unit.selectedUnits[4]!=="LMH"){
+            const fluxData=GlobalUnitConversion(GlobalUnitConversionStore,calcEngineData.flux_Filter_actual,unit.selectedUnits[4],unitTypeFlux);
+            dispatch(handleCalcEngineResponse({...response,["flux_Filter_actual"]:fluxData}));
+          }
+          dispatch(
+            handleOperatingFlux(calcEngineResponse?.data?.responseConfigVM)
+          );
+          dispatch(updateCallCalcEngineUFConfig(false));
         }
-        dispatch(
-          handleOperatingFlux(calcEngineResponse?.data?.responseConfigVM)
-        );
-        dispatch(updateCallCalcEngineUFConfig(false));
       }
-    }
   };
 
+  /* Called inside handleCalcEngineAPICall */
   const callUFConfigAPI = async (ufConfigPayload) => {
     const MethodName = {
       Method: "uf/api/v1/UFConfig",
@@ -1463,7 +1498,6 @@ const Configuration = () => {
     let calcEngineResponse = await getData(UFRequestDetails);
     if (calcEngineResponse?.data?.statusCode == "OK") {
       if (calcEngineResponse?.data?.responseConfigVM !== undefined) {
-        // console.log("5 RECEIVED RESPONSE FROM CALC ENGINE");
         const response=calcEngineResponse?.data?.responseConfigVM;
         if(unit.selectedUnits[4]!=="LMH"){
           const fluxData=GlobalUnitConversion(GlobalUnitConversionStore,calcEngineData.flux_Filter_actual,unit.selectedUnits[4],unitTypeFlux);
@@ -1626,15 +1660,24 @@ const Configuration = () => {
     // dispatch(setCustomAvail(true));
   };
 
+  /* Initiating API call for getting Full Object From CalcEngine */
   const handleUFConfigAPICall = (a, activeModuleDetails) => {
     handleCalcEngineAPICall(a, activeModuleDetails);
   };
 
-  const handleInputChange = (e) => {
-    // console.log("handleInputChange callUFConfigAndUpdateOperatingFlux: START");
+  /* Initiating API call for getting Operating Flux From CalcEngine */
+  const getOperatingFluxFromCalcEngine = () =>{
+    console.log("getOperatingFluxFromCalcEngine : START");
     const activeModuleDetails = getModuleDetails(UFData.uFModuleID);
     const ufConfigPayload = getUFConfigPayload(activeModuleDetails);
+    callUFConfigAndUpdateOperatingFlux({
+      ...ufConfigPayload,
+      standBy: UFData.uFBWCEBStandbyOptionID,
+    });
+  };
 
+  /* Compute and Update Operating Flux based on the input changes */
+  const handleInputChange = (e) => {
     let { name, value } = e.target;
     value = value == "" ? "" : value;
 
@@ -1645,19 +1688,13 @@ const Configuration = () => {
           [e.target.name]: value == "" ? value : Number(value),
         })
       );
-      dispatch(setUfDataUpdate(true));
-
-      callUFConfigAndUpdateOperatingFlux({
-        ...ufConfigPayload,
-        standBy: UFData.uFBWCEBStandbyOptionID,
-      });
-
       dispatch(calculateUFFields());
-      // const userInput = e.target.value > 0 ? Number(e.target.value) : "";
+      dispatch(setUfDataUpdate(true));
     }
     dispatch(setCustomAvail(false));
   };
 
+  /* Generate Table based on Radio Button Selection */
   const handleStandByOptionSelection = (option) => {
     /* StandBy Option is enabled, then show 1 s the default value, otherwise zero */
     dispatch(setCustomAvail(true));
@@ -1686,6 +1723,7 @@ const Configuration = () => {
     handleUFConfigAPICall(option, activeModuleDetails);
   };
 
+  /* Reset Table based on Filter Applied on modules */
   const handleShowFilteredModules = (e) => {
     const { checked, name } = e.target;
     dispatch(setCustomOfflineTimePerUnit(false));
@@ -1695,39 +1733,22 @@ const Configuration = () => {
       const activeModuleDetails = getModuleDetails("8");
       dispatch(updateActiveUFModule(activeModuleDetails));
       setActiveUFModuleInStore(8);
-      // dispatch(
-      //   updateUFStore({
-      //     ...UFData,
-      //     ["uFModuleID"]: "8",
-      //     ["uFBWProtocolID"]:
-      //       activeModuleDetails?.newModuleLongName?.indexOf("UXA") >= 0
-      //         ? "1"
-      //         : UFData.uFBWProtocolID,
-      //   })
-      // );
       handleUFConfigAPICall(UFData.uFBWCEBStandbyOptionID, activeModuleDetails);
     } else {
       const activeModuleDetails = getModuleDetails("24");
       dispatch(updateActiveUFModule(activeModuleDetails));
-      // dispatch(
-      //   updateUFStore({
-      //     ...UFData,
-      //     ["uFModuleID"]: "24",
-      //     ["uFBWProtocolID"]:
-      //       activeModuleDetails?.newModuleLongName?.indexOf("UXA") >= 0
-      //         ? "1"
-      //         : UFData.uFBWProtocolID,
-      //   })
-      // );
       setActiveUFModuleInStore(24);
       handleUFConfigAPICall(UFData.uFBWCEBStandbyOptionID, activeModuleDetails);
     }
     dispatch(setUfDataUpdate(true));
   };
+
+  /* Filter Table based on Slider Range */
   const handleSliderChange = (value) => {
     setProgressValue(value);
     dispatch(updateSliderValue(value));
   };
+
   const generateRecommendedConfigs = (calcEngineResponse) => {
     // console.log(
     //   "generateRecommendedConfigs standBy",
@@ -1783,6 +1804,7 @@ const Configuration = () => {
     modulesPerTrain: defaultInputRangeConfig["modulesPerTrain"],
     skidsPerTrain: defaultInputRangeConfig["skidsPerTrain"],
   };
+
   const checkError = (id) => {
     return !(
       validations[id]?.minValue <= UFData[id] &&

@@ -46,6 +46,7 @@ import Wave_PRO_UF_Logo from "../../common/assets/images/Wave-PRO-UF-Logo-02.svg
 import { updateGUnitConversion } from "../../common/utils/GlobalUnitConversionSlice";
 import { MyError } from "../../common/utils/ErrorCreator";
 import { updateTabAvailable } from "../../common/ReportIXDSlice";
+import { updateTabAvailableForUF } from "../../common/ReportUFSlice";
 const SideMenu = ({showSideMenu, setShowMenuIcon}) => {   
   const UserInfoStore=useSelector((state)=>state.userInfo.data);
   const userID =UserInfoStore?UserInfoStore.UserId:1;
@@ -346,6 +347,7 @@ const SideMenu = ({showSideMenu, setShowMenuIcon}) => {
   const handleNavigate = () => {
       navigate("/home");
       dispatch(updateTabAvailable({"FeedSetup":false,"IXD":false}));
+      dispatch(updateTabAvailableForUF({"FeedSetup":false,"UF":false}));
   };
   return (
     <>

@@ -569,7 +569,7 @@ const ManageCase = ({ show, close }) => {
                         )}
                       </div>
                       <div
-                        className="reorder"
+                        className="reorder draggabel"
                         onDragStart={(e) => handleDragStart(e, index)}
                         draggable
                         onDrop={(e) => handleDrop(e, index)}

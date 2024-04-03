@@ -70,22 +70,22 @@ const Footer = ({locationCheck, tabCheck}) => {
       <FooterStyled locationCheck={locationCheck} tabCheck={tabCheck}>
           <div className="footer-list">
             <div className="footer_list_items">
-                <a href="https://www.dupont.com/" target="__blank">
+                <a href="https://www.dupont.com/" target="__blank" rel="noopener">
                   DuPont.com
                 </a>
                 <a className="vertical_line"></a>
-                <a href="https://www.dupont.com/privacy.html" target="__blank">
+                <a href="https://www.dupont.com/privacy.html" target="__blank" rel="noopener">
                   Privacy
                 </a>
                 <a className="vertical_line"></a>
                 <a
                   href="https://www.dupont.com/legal-notices-and-terms-of-use.html"
-                  target="__blank">
+                  target="__blank" rel="noopener">
                   Legal Notice & Terms of use
                 </a>
                 <a className="vertical_line"></a>
                 <a href="https://www.dupont.com/accessibility.html"
-                  target="__blank">
+                  target="__blank" rel="noopener">
                   Accessibility
                 </a>
                 {/* <a className="vertical_line"></a>

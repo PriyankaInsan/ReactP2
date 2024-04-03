@@ -194,7 +194,7 @@ export const IXDUtility = (
       ["displacementVolume"]: false,
       ["fatRinseRecycle"]: false,
       ["fatRinseVolume"]: false,
-      ["settingDuration"]: true,
+      ["settingDuration"]: false,
     };
   } else if (
     (actionForCation1 === 0 && actionForCation2 === 4) ||
@@ -431,7 +431,7 @@ export const IXDUtility = (
       ["displacementVolume"]: false,
       ["fatRinseRecycle"]: true,
       ["fatRinseVolume"]: true,
-      ["settingDuration"]: true,
+      ["settingDuration"]: false,
     };
   } else if (
     (actionForAnion1 === 0 && actionForAnion2 === 4) ||

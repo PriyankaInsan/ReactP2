@@ -6,7 +6,6 @@ import CloseIcon from "../../../common/icons/CloseIcon";
 import ProjectCostAndChemicalLibraryStyled from "./ProjectCostAndChemicalLibraryStyled";
 import DefaultChemicalPrices from "./DefaultChemicalPrices";
 import DefaultOperatingCost from "./DefaultOperatingCost";
-import SuccessMessageChemicalLibraryAndOperatingCost from "./SuccessMessageChemicalLibraryAndOperatingCost";
 import {  updateUnitFlag,updateUnitTypeSVolume,updateUnitTypeDensity
 } from "../../../common/utils/GlobalUnitConversionSlice";
 import CloseIconBig from "../../../common/icons/CloseIconBig";
@@ -43,6 +42,7 @@ import { updateChemicalConfig } from "../../../common/ProjectInfoSlice";
 import DefaultValueSaved from "./DefaultValueSaved";
 import CloseCircleRedIcon from "../../../common/icons/CloseCircleRedIcon";
 import RightTickMarkBigIcon from "../../../common/icons/RightTickMarkBigIcon";
+import EditSavedMessage from "./EditSavedMessage";
 
 const defaultNewChemicalData = {
   iD: 0,
@@ -165,7 +165,7 @@ const ProjectCostAndChemicalLibrary = ({ show, close, forUser }) => {
     { title: "Displayed as" },
     { title: "Actions" },
   ];
-  const requiredValidation = ["Acid", "Base", "Oxidant", "Organic Acid","Salt"];
+  const requiredValidation = ["Acid", "Base", "Oxidant", "Organic Acid","Salt","Coagulant"];
   const validationFlag = [
     { chemicalCat: "Acid", target: "acid" },
     { chemicalCat: "Base", target: "base" },
@@ -567,6 +567,7 @@ const ProjectCostAndChemicalLibrary = ({ show, close, forUser }) => {
         "Sodium Chloride",
         "Sodium Hydroxide",
         "Sodium Carbonate",
+        "Sodium Hypochlorite"
       ];
       if (!name || !value) {
         return true;
@@ -653,6 +654,14 @@ const ProjectCostAndChemicalLibrary = ({ show, close, forUser }) => {
   const handleNumberValue = (e) => {
     const { value, name } = e.target;
     if (!isNaN(value)) {
+      setIsError({
+        chemicalName: false,
+        symbol: false,
+        displayName: false,
+        bulkConcentration: false,
+        bulkDensity: false,
+        bulkPrice: false,
+      });
       if (name == "bulkConcentration" && newData.symbol) {
         let bulkDensity = newData.bulkDensity;
         if (name == "bulkConcentration") {
@@ -671,7 +680,14 @@ const ProjectCostAndChemicalLibrary = ({ show, close, forUser }) => {
   };
   const handleTextValue = (e) => {
     const { value, name } = e.target;
-
+    setIsError({
+      chemicalName: false,
+      symbol: false,
+      displayName: false,
+      bulkConcentration: false,
+      bulkDensity: false,
+      bulkPrice: false,
+    });
     if (name == "symbol") {
       setNewData({
         ...newData,
@@ -1019,9 +1035,10 @@ const ProjectCostAndChemicalLibrary = ({ show, close, forUser }) => {
               fontSize="16px"
               fontWeight="600"
             />
+             {/* ${forUser ? "user account preference":`project ${projectTitle}`}. Only select chemicals are shown below`} */}
             <CustomHeading
               label={`Add chemicals as per your need and update operating cost for
-                   ${forUser ? "user account preference":`project ${projectTitle}`}. Only select chemicals are shown below`}
+                   ${forUser ? "user account preference":`project ${projectTitle}`}.`}
               color={colors.blackTransparency045}
               fontFamily="DiodrumRegular"
               fontSize="12px"
@@ -1582,7 +1599,7 @@ const ProjectCostAndChemicalLibrary = ({ show, close, forUser }) => {
             id="btnSave"
             onClick={() => handleSaveData()}
           ></StandardPrimaryButton>
-          <SuccessMessageChemicalLibraryAndOperatingCost
+          <EditSavedMessage
             show={openSuccessMessage}
             close={setOpenSuccessMessage}
             parentModal={setOpenModal}

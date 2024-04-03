@@ -874,6 +874,17 @@ const RegenerationConditions = () => {
       const selectedResin = {
         ...cationResinCondition,
         ["temperatureID"]: val,
+        ["temperature"]:
+        unit.selectedUnits[2] === "°C"
+          ? designTemp
+          : parseFloat(
+              GlobalUnitConversion(
+                GlobalUnitConversionStore,
+                designTemp,
+                unit.selectedUnits[2],
+                "°C"
+              )
+            ).toFixed(1),
       };
       dispatch(updateCationInitialization(selectedResin));
 
@@ -885,7 +896,7 @@ const RegenerationConditions = () => {
     if (!isNaN(inputValue)) {
       const selectedResin = {
         ...cationResinCondition,
-        ["temperature"]: Number(e.target.value),
+        ["temperature"]: e.target.value,
       };
       dispatch(updateCationInitialization(selectedResin));
       dispatch(updateCationResin(selectedResin));
@@ -989,9 +1000,14 @@ const RegenerationConditions = () => {
               updateProductQualityRegenerantDose([
                 {
                   ...ixStoreCation,
-                  ["regenerantDoseVal4"]:
+                  ["regenerantDoseVal4"]:    GlobalUnitConversion(
+                    GlobalUnitConversionStore,
                     responseRangesValues.data?.typicalValue
-                      ?.regenerantDoseTypical,
+                    ?.regenerantDoseTypical,
+                    unit.selectedUnits[14],
+                    "g/L"
+                 ),
+
                 },
                 ixStoreAnion,
               ])
@@ -1135,8 +1151,14 @@ const RegenerationConditions = () => {
                 {
                   ...ixStoreAnion,
                   ["regenerantDoseVal4"]:
+                  GlobalUnitConversion(
+                    GlobalUnitConversionStore,
                     responseRangesValues.data?.typicalValue
-                      ?.regenerantDoseTypical,
+                    ?.regenerantDoseTypical,
+                    unit.selectedUnits[14],
+                    "g/L"
+                 ),
+  
                 },
               ])
             );
@@ -1173,6 +1195,17 @@ const RegenerationConditions = () => {
       const selectedResin = {
         ...anionResinCondition,
         ["temperatureID"]: val,
+        ["temperature"]:
+        unit.selectedUnits[2] === "°C"
+          ? designTemp
+          : parseFloat(
+              GlobalUnitConversion(
+                GlobalUnitConversionStore,
+                designTemp,
+                unit.selectedUnits[2],
+                "°C"
+              )
+            ).toFixed(1),
       };
       dispatch(updateAnionInitialization(selectedResin));
 
@@ -1185,7 +1218,7 @@ const RegenerationConditions = () => {
     if (!isNaN(inputValue)) {
       const selectedResin = {
         ...anionResinCondition,
-        ["temperature"]: Number(e.target.value),
+        ["temperature"]: e.target.value,
       };
       dispatch(updateAnionInitialization(selectedResin));
       dispatch(updateAnionResin(selectedResin));
@@ -1301,7 +1334,8 @@ const RegenerationConditions = () => {
       if (
         value < parseFloat(CationRangeValidatior[name]?.minValue) ||
         value > parseFloat(CationRangeValidatior[name]?.maxValue) ||
-        isNaN(value)
+        isNaN(value) ||
+        resinVal[0]?.temperature == ""
       ) {
         setAutoFocusValue(true);
         setMessage(
@@ -1467,7 +1501,8 @@ const RegenerationConditions = () => {
       if (
         value < parseFloat(AnionRangeValidatior[name]?.minValue) ||
         value > parseFloat(AnionRangeValidatior[name]?.maxValue) ||
-        isNaN(value)
+        isNaN(value) ||
+        resinVal[1]?.temperature == ""
       ) {
         setAutoFocusValue(true);
         setMessage(
@@ -1644,7 +1679,8 @@ const RegenerationConditions = () => {
                         resinVal[0]?.temperature <
                           (unit.selectedUnits[2] === "°C" ? 0 : 32) ||
                         resinVal[0]?.temperature >
-                          (unit.selectedUnits[2] === "°C" ? 100 : 212)
+                          (unit.selectedUnits[2] === "°C" ? 100 : 212) ||
+                        resinVal[0]?.temperature == ""
                       }
                       isWarning={false}
                       id="inputBox"
@@ -2072,7 +2108,8 @@ const RegenerationConditions = () => {
                         resinVal[1]?.temperature <
                           (unit.selectedUnits[2] === "°C" ? 0 : 32) ||
                         resinVal[1]?.temperature >
-                          (unit.selectedUnits[2] === "°C" ? 100 : 212)
+                          (unit.selectedUnits[2] === "°C" ? 100 : 212) ||
+                        resinVal[1]?.temperature == ""
                       }
                       type="number"
                       id="inputBox"

@@ -49,6 +49,7 @@ const initialState = {
     Tchnology: "",
   },
   projectData: {},
+  countryData:[]
 };
 export const ProjectInfoSlice = createSlice({
   name: "ProjectInfo",
@@ -119,6 +120,9 @@ export const ProjectInfoSlice = createSlice({
         currencyUnit: symbole,
       };
     },
+    updateCountryName:(state,action)=>{
+      state.countryData = action.payload;
+    }
   },
 });
 
@@ -133,6 +137,7 @@ export const {
   updateCaseConfig,
   updateProjectCurrency,
   updateProjectTitle,
+  updateCountryName,
 } = ProjectInfoSlice.actions;
 
 export default ProjectInfoSlice.reducer;

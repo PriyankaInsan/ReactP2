@@ -23,7 +23,6 @@ const ViewReport = () => {
   );
   const [hasError, setHasError] = useState(error);
 
-  console.log(reportData, "PK reportData");
   useEffect(() => {
     document.body.addEventListener("keydown", handleKeyDown);
      return () => {
@@ -70,16 +69,17 @@ const ViewReport = () => {
 
   const convertBase64ToPDF = (base64String) => {
     // const byteArrayEx= JSON.parse(base64String);
-    console.log("base64String", base64String);
+    // console.log("base64String", base64String);
     const byteCharacters = atob(base64String);
-    console.log("byteCharacters", byteCharacters);
+    // console.log("byteCharacters", byteCharacters);
     const byteArray = new Uint8Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
       byteArray[i] = byteCharacters.charCodeAt(i);
     }
     const blob = new Blob([byteArray], { type: "application/pdf" });
     const pdfUrl = URL.createObjectURL(blob);
-    console.log("blob", blob);
+    // console.log("pdfUrl", pdfUrl);
+    // console.log("blob", blob);
     setPdfData(pdfUrl);
     // saveAs(blob, "converted.pdf");
   };

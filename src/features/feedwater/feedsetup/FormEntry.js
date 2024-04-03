@@ -1787,7 +1787,8 @@ const FormEntry = () => {
    let IXDValuesSoft60 = 0;
    let IXDValuesSoft61 = 0;
    let IXDValuesHard101= 0;
-   let valuesstart=0.99;
+   let valuesstart=0;
+   let valuessoft=1;
    let StreamDetailstempMax=0;
    let StreamDetailstempDesign=0;
    let StreamDetailstempMin=0;
@@ -1822,7 +1823,9 @@ const FormEntry = () => {
   }
 
  if(unit.selectedUnits[2]==="°C"){  
-  valuesstart =0.99; 
+
+  valuesstart=0;
+  valuessoft=1;
   UFValuesSoft40 = 40.00;
   UFValuesSoft41 = 41.00;
   UFValuesHard101= 101.00;
@@ -1831,7 +1834,8 @@ const FormEntry = () => {
   IXDValuesHard101= 101.00;  
  }
  else{
-  valuesstart=33.7;
+  valuesstart=0;
+  valuessoft=33.8;
   UFValuesSoft40= 104;
   UFValuesSoft41= 105.9;
   UFValuesHard101= 213.9;
@@ -2177,7 +2181,23 @@ const FormEntry = () => {
         console.log("temperatureValues.1",parseFloat(e),parseFloat(UFValuesSoft41),StreamDetailstempDesign[0],StreamDetailstempMax[0]);
         if (Technology === "UF" || Technology === "null") {
           
-          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(UFValuesSoft41)) {
+          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(valuessoft)) {
+            setMinimumisWarning(true);
+            setMinimumisError(false);
+            if (type === "TextonBlur") {
+              dispatch(updateLoader(true));
+              const StreamDetails = Stremdata?.map((i) => {
+                i = { ...i, tempMin: e };
+                return i;
+              });
+              setStremdata(StreamDetails);
+              setTimeout(() => {
+                dispatch(updateLoader(false));
+              }, 5);
+            }
+          } 
+
+          else if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(UFValuesSoft41)) {
             setMinimumisWarning(false);
             setMinimumisError(false);
             if (type === "TextonBlur") {
@@ -2192,6 +2212,8 @@ const FormEntry = () => {
               }, 5);
             }
           } 
+
+
           else if ( parseFloat(e) > parseFloat(UFValuesSoft40) && parseFloat(e) < parseFloat(UFValuesHard101)) {
             setMinimumisWarning(true);
             setMinimumisError(false);
@@ -2227,7 +2249,23 @@ const FormEntry = () => {
           }
          }
           else if (Technology === "IXD") {
-          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(IXDValuesSoft61) ) {
+            if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(valuessoft)) {
+                setIXMinimumisWarning(true);
+                setIXMinimumisError(false);
+                if (type === "TextonBlur") {
+                  dispatch(updateLoader(true));
+                  const StreamDetails = Stremdata?.map((i) => {
+                    i = { ...i, tempMin: e };
+                    return i;
+                  });
+                  setStremdata(StreamDetails);
+                  setTimeout(() => {
+                    dispatch(updateLoader(false));
+                  }, 5);
+                }
+              }
+
+         else if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(IXDValuesSoft61) ) {
             setIXMinimumisWarning(false);
             setIXMinimumisError(false);
             if (type === "TextonBlur") {
@@ -2310,7 +2348,26 @@ const FormEntry = () => {
      
       if (parseFloat(StreamDetailstempMax[0]) >= parseFloat(e) && parseFloat(e) >= parseFloat(StreamDetailstempMin[0])) {
         if (Technology === "UF" || Technology === "null") {
-          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(UFValuesSoft41)) {
+          
+          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(valuessoft)) {
+            setDesignisError(false);
+            setDesignsWarning(true);
+            if (type === "TextonBlur") {
+              dispatch(updateLoader(true));
+              const StreamDetails = Stremdata?.map((i) => {
+                i = { ...i, tempDesign: e };
+                return i;
+              });
+              setStremdata(StreamDetails);
+              setDesignTemperatureForUF(e);
+              setIsDesignTempChanged(true);
+              setTimeout(() => {
+                dispatch(updateLoader(false));
+              }, 5);
+            }
+          }
+
+         else if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(UFValuesSoft41)) {
             setDesignisError(false);
             setDesignsWarning(false);
             if (type === "TextonBlur") {
@@ -2363,7 +2420,23 @@ const FormEntry = () => {
             }
           }
         } else if (Technology === "IXD") {
-          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(IXDValuesSoft61)) {
+          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(valuessoft)) {
+            setDesignisError(false);
+            setDesignsWarning(true);
+            if (type === "TextonBlur") {
+              dispatch(updateLoader(true));
+              const StreamDetails = Stremdata?.map((i) => {
+                i = { ...i, tempDesign: e };
+                return i;
+              });
+              setStremdata(StreamDetails);
+              setTimeout(() => {
+                dispatch(updateLoader(false));
+              }, 5);
+            }
+          }
+
+         else if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(IXDValuesSoft61)) {
             setDesignisError(false);
             setDesignsWarning(false);
             if (type === "TextonBlur") {
@@ -2431,12 +2504,7 @@ const FormEntry = () => {
             dispatch(updateLoader(false));
           }, 5);
         }
-        // console.log(
-        //   "Design  values/// ",
-        //   StreamDetailstempMax[0],
-        //   StreamDetailstempDesign[0],
-        //   e
-        // );
+       
       }
     } else if (textname === "Maximum") {
       console.log("temperatureValues.",
@@ -2447,8 +2515,24 @@ const FormEntry = () => {
         parseFloat(StreamDetailstempDesign[0]) >= parseFloat(StreamDetailstempMin[0])
       ) {
         if (Technology === "UF" || Technology === "null") {
-          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(UFValuesSoft41)) {
+          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(valuessoft)) {
+            setMaximumisWarning(true);
+            setMaximumisError(false);
+            if (type === "TextonBlur") {
+              dispatch(updateLoader(true));
+              const StreamDetails = Stremdata?.map((i) => {
+                i = { ...i, tempMax: e };
+                return i;
+              });
+              setStremdata(StreamDetails);
+              setTimeout(() => {
+                dispatch(updateLoader(false));
+              }, 5);
+            }
+          }
 
+
+        else if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(UFValuesSoft41)) {
             console.log("temperatureValues1",   Technology   );
             setMaximumisWarning(false);
             setMaximumisError(false);
@@ -2499,7 +2583,23 @@ const FormEntry = () => {
             }
           }
         } else if (Technology === "IXD") {
-          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(IXDValuesSoft61)) {
+          if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e)< parseFloat(valuessoft)) {
+            setIXMaximumisWarning(true);
+            setIXMaximumisError(false);
+            if (type === "TextonBlur") {
+              dispatch(updateLoader(true));
+              const StreamDetails = Stremdata?.map((i) => {
+                i = { ...i, tempMax: e };
+                return i;
+              });
+              setStremdata(StreamDetails);
+              setTimeout(() => {
+                dispatch(updateLoader(false));
+              }, 5);
+            }
+          }
+
+        else  if (parseFloat(e) > parseFloat(valuesstart) && parseFloat(e) < parseFloat(IXDValuesSoft61)) {
             console.log("temperatureValues11",   Technology   );
             setIXMaximumisWarning(false);
             setIXMaximumisError(false);

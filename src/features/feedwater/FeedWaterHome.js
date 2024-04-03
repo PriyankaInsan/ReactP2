@@ -17,6 +17,7 @@ import DynamicLoadder from "../../common/utils/DynamicLoadder";
 import {
   updateCaseConfig,
   updateChemicalConfig,
+  updateCountryName,
   updateProjectCurrency,
   updateProjectData,
   updateProjectInfo,
@@ -27,8 +28,9 @@ import {
 import { updateUnitTypeArea, updateUnitTypeCVolume, updateUnitTypeConductivity, updateUnitTypeContentration, updateUnitTypeDensity, updateUnitTypeFlow, updateUnitTypeFlux, updateUnitTypeGasFlow, updateUnitTypeLVelocity, updateUnitTypeLength, updateUnitTypeOrganic, updateUnitTypePower, updateUnitTypePressure, updateUnitTypeRVolume, updateUnitTypeRegeneration, updateUnitTypeSVelocity, updateUnitTypeSVolume, updateUnitTypeTemp, updateUnitTypeWeight } from "../../common/utils/GlobalUnitConversionSlice";
 import GlobalUnitConversion from "../../common/utils/GlobalUnitConversion";
 import { setIXDUpdate, updateIXStore } from "./ix/IXDSlice";
-import { UpdateUFReport } from "../../common/ReportUFSlice";
+import { UpdateUFReport, resetReportUfSlice, updateUfReportLoading } from "../../common/ReportUFSlice";
 import { updateIXDJson } from "../../common/ReportIXDSlice";
+import { resetReport } from "./activitymonitor/activityMonitorSlice";
 
 
 const FeedWaterHome = () => {
@@ -55,6 +57,7 @@ const FeedWaterHome = () => {
   const [getCurrencylist, CurrencylistResponse] = useLazyGetAllDataQuery();
   const [getUFReportJSON, UFReportJSONResponse] = useLazyGetAllDataQuery();
   const [getIXReportJSON, IXReportJSONResponse] = useLazyGetAllDataQuery();
+  const [getCountry, responseCountry ] = useLazyGetAllDataQuery();
 
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -70,6 +73,8 @@ const FeedWaterHome = () => {
         (item) => item?.technologyID == 5 && !item?.isDeleted
       )?.caseTreatmentID
   );
+  const {
+    techNolist} = useSelector((state) => state.processDiagramSlice);
   const lstTechnologyLists = useSelector(
     (state) =>
       state.processDiagramSlice.lstTechnologyLists
@@ -89,8 +94,18 @@ const FeedWaterHome = () => {
   const [IXData_PostData, { Umoiddata1 }] = useCreateDataMutation();
   useEffect(() => {
     if (UFReportJSONResponse.isSuccess) {
-      console.log("UFReportJSONResponse.data",UFReportJSONResponse.data);
-      dispatch(UpdateUFReport(UFReportJSONResponse.data));
+      console.log("UFReportJSONResponse.data",UFReportJSONResponse);
+      if(UFReportJSONResponse?.data?.responseCode===204){
+        console.log("PK UFReportJSONResponse.data if",UFReportJSONResponse.data.responseCode);
+        dispatch(updateUfReportLoading(false)); 
+      }else{
+        console.log("PK UFReportJSONResponse.data else",UFReportJSONResponse.data.responseCode);
+        dispatch(UpdateUFReport(UFReportJSONResponse.data));
+      }
+    }
+    if (UFReportJSONResponse.isError) {
+      console.log("PK UFReportJSONResponse Error",UFReportJSONResponse);
+      dispatch(updateUfReportLoading(false));
     }
   }, [UFReportJSONResponse]);
 
@@ -117,6 +132,8 @@ const FeedWaterHome = () => {
         `${"masterdata/api/v1/DefaultCurrency"}?userID=${userId}&projectid=${projectid}`
         
       );
+      getCountry(`${"masterdata/api/v1/Country"}`);
+
     }
   }, [state]);
 
@@ -137,15 +154,17 @@ const FeedWaterHome = () => {
     if (response.isSuccess) {
       // if (newDesignExist != true) {.length>
         // if(unit.selectedUnits.length>0){
-
+          if (response.data.systemDesignCaseTreatmentVM.find((item)=>item.treatmentName=="UF")) {
         getUFReportJSON(
           `${"uf/api/v1/UFReportJSON"}?userID=${userId}&projectID=${projectid}&caseID=${response?.data?.caseID}`
         );
-
-       
+          }
+          if (response.data.systemDesignCaseTreatmentVM.find((item)=>item.treatmentName=="IXD"))  {
           getIXReportJSON(
             `${"ix/api/v1/IXReportJSON"}?userID=${userId}&projectID=${projectid}&caseID=${response?.data?.caseID}`
           );
+          }       
+          
        console.log("PK case setted");
         var listTreatmentID=response.data.systemDesignCaseTreatmentVM;
         let newFlowValue=Number(GlobalUnitConversion(GlobalUnitConversionStore,response.data.flow,unit.selectedUnits[1],"m³/h").toFixed(2));
@@ -168,18 +187,30 @@ const FeedWaterHome = () => {
           : location.state?.title
           ? `${location.state.title} - ${response.data.projectCaseName}`
           : "";
-    // if (caseFlag !== true) 
-    // {
-      dispatch(updateProjectTitle(projectName));
+          dispatch(updateProjectTitle(projectName));
+
+    if (caseFlag === true) 
+    {
       autoSaveIXDData(listTreatmentID);
-    // }
+    }
       // console.log("PK kdhhfhf", location?.state);
 
       dispatch(updateProjectInfo(obj));
     }
     // }
   }, [response]);
-
+  useEffect(() => {
+    if (responseCountry.isSuccess === true) {
+      dispatch(updateCountryName(responseCountry.data));
+    }
+    if (responseCountry.isError) {
+      throw new MyError(
+        "Create New Project Api Error",
+        responseCountry.error.status,
+        "ApiError"
+      );
+    }
+  }, [responseCountry]);
   const autoSaveIXDData = (listTreatmentID) => {
     const existingData = {
       ...ixStore,
@@ -602,9 +633,23 @@ const FeedWaterHome = () => {
   }, [CurrencylistResponse]);
   useEffect(() => {
     if (IXReportJSONResponse.isSuccess) {
-      console.log("PK IXReportJSONResponse.data");
-      dispatch(updateIXDJson(IXReportJSONResponse.data));
+      console.log("PK IXReportJSONResponse.data",IXReportJSONResponse);
+      if(IXReportJSONResponse?.data?.responseCode===204){
+        console.log("PK IXReportJSONResponse.data if",IXReportJSONResponse.data.responseCode);
+        dispatch(resetReport()); 
+      }else{
+        console.log("PK IXReportJSONResponse.data else",IXReportJSONResponse.data.responseCode);
+        dispatch(updateIXDJson(IXReportJSONResponse.data));
+      }
     }
+    if (IXReportJSONResponse.isError) {
+      console.log("PK IXReportJSONResponse Error",IXReportJSONResponse);
+      dispatch(resetReport());
+    }
+    // if (IXReportJSONResponse.) {
+    //   console.log("PK IXReportJSONResponse Error",IXReportJSONResponse.data);
+    //   dispatch(resetReport());
+    // }
   }, [IXReportJSONResponse]);
   
 
@@ -629,6 +674,9 @@ const FeedWaterHome = () => {
   // console.log(scrollDirection);
   const checkFeed = localStorage.getItem("Feed Setup");
   // const scroll = useSelector((state)=>state.scroll.value);
+
+  localStorage.setItem("firstLoginChecked",true);
+
 
   return (
     <>

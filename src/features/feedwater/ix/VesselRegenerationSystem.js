@@ -253,6 +253,9 @@ const VesselRegenerationSystem = () => {
         ["vessel3"]: null,
         ["vessel4"]: null,
         ["degasifation_ind"]: false,
+        ["selectedEffluent"]: null,
+          ["effluentValue"]: null,
+          ["location"]: null,
         selectedResinList: [
           {
             ixResinID1: 139,
@@ -274,9 +277,7 @@ const VesselRegenerationSystem = () => {
         listRegenConds: [
           {
             regenerantID: 0,
-            temperature: designTemp
-              ? parseFloat(designTemp).toFixed(1)
-              : parseFloat(25).toFixed(1),
+            temperature: designTemp ? designTemp : 25,
             temperatureID: 0,
             step1_ind: true,
             step2_ind: false,
@@ -293,9 +294,7 @@ const VesselRegenerationSystem = () => {
           },
           {
             regenerantID: 0,
-            temperature: designTemp
-              ? parseFloat(designTemp).toFixed(1)
-              : parseFloat(25).toFixed(1),
+            temperature:designTemp ? designTemp : 25,
             temperatureID: 0,
             step1_ind: true,
             step2_ind: false,
@@ -458,6 +457,9 @@ const VesselRegenerationSystem = () => {
         ["vessel3"]: null,
         ["vessel4"]: null,
         ["degasifation_ind"]: false,
+        ["selectedEffluent"]: null,
+          ["effluentValue"]: null,
+          ["location"]: null,
         selectedResinList: [
           {
             ixResinID1: 139,
@@ -682,6 +684,9 @@ const VesselRegenerationSystem = () => {
         ["vessel3"]: null,
         ["vessel4"]: null,
         ["degasifation_ind"]: false,
+        ["selectedEffluent"]: null,
+          ["effluentValue"]: null,
+          ["location"]: null,
         selectedResinList: [
           {
             ixResinID1: 139,
@@ -1005,7 +1010,13 @@ const VesselRegenerationSystem = () => {
             regenerantDoseVal2: Cation_regenerantDoseVal2,
             regenerantDoseVal3: Cation_regenerantDoseVal3,
             regenerantDoseVal4:
+            GlobalUnitConversion(
+              GlobalUnitConversionStore,
               cationAdvRegen?.typicalValue?.regenerantDoseTypical,
+              unit.selectedUnits[14],
+              "g/L"
+           ),
+             
             overAllEfficiency: 0,
             overAllComputation: 0,
             doseOptimization: 0,
@@ -1040,7 +1051,12 @@ const VesselRegenerationSystem = () => {
             regenerantDoseVal2: Anion_regenerantDoseVal2,
             regenerantDoseVal3: Anion_regenerantDoseVal3,
             regenerantDoseVal4:
+            GlobalUnitConversion(
+              GlobalUnitConversionStore,
               anionAdvRegen?.typicalValue?.regenerantDoseTypical, ///dose
+              unit.selectedUnits[14],
+              "g/L"
+           ),
             overAllEfficiency: 0,
             overAllComputation: 0,
             doseOptimization: 0,
@@ -1514,7 +1530,7 @@ const VesselRegenerationSystem = () => {
           <StyledCard
             className="degasification-column"
             hidden={
-              vesselflag1 || cationTargetValue == 0 || AnionTargetName == 0
+              vesselflag1 || cationTargetValue == 0 || AnionTargetName == 0 ||ixStore?.cationResin == 9 && ixStore?.anionResin == 9||ixStore?.cationResin == 10 && ixStore?.anionResin == 10
             }
           >
             <Card.Header>

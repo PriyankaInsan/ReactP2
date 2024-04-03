@@ -42,7 +42,8 @@ import GlobalUnitConversion from "../../../common/utils/GlobalUnitConversion";
 import { setIXDUpdate } from "../ix/IXDSlice";
 import ProjectSaveWarning from "../systemdesign/ProjectSaveWarning";
 import { updateTabAvailable } from "../../../common/ReportIXDSlice";
-
+import { updateTabAvailableForUF } from "../../../common/ReportUFSlice";
+import { updateLeftpanel } from "../../menu/SideMenuSlice";
 const FeedWaterHeader = ({ currentPanel }) => {
   const dispatch = useDispatch();
   const UserInfoStore = useSelector((state) => state.userInfo.data);
@@ -54,6 +55,10 @@ const FeedWaterHeader = ({ currentPanel }) => {
   const UFData = useSelector((state) => state.UFStore.data);
   const feedCheck = useSelector((state) => state.tabData.tab);
   const userId = UserInfoStore ? UserInfoStore.UserId : 0;
+  const {
+    modeling,
+    viewReport,
+  } = useSelector((state) => state.IXStore);
   const GlobalUnitConversionStore = useSelector(
     (state) => state.GUnitConversion.data
   );
@@ -194,20 +199,16 @@ const FeedWaterHeader = ({ currentPanel }) => {
   const TechnologyStoreData = useSelector(
     (state) => state.processDiagramSlice.addedTechnology
   );
-  console.log("TechnologyStoreData Entry page", TechnologyStoreData);
   let Technologynames = TechnologyStoreData.filter((item) => item.id > 0);
   let Technology = [];
   let lengthcount = Technologynames.length;
 
   if (lengthcount == 1) {
     Technology = Technologynames[0].heading;
-    console.log("Technology Entry if", Technology);
   } else if (lengthcount > 1) {
     Technology = "Multiple";
-    console.log("Technology Entry else if", Technology);
   } else {
     Technology = "null";
-    console.log("Technology Entry else", Technology);
   }
 
   const [IXData_PostData, { Umoiddata }] = useCreateDataMutation();
@@ -215,8 +216,6 @@ const FeedWaterHeader = ({ currentPanel }) => {
   const [POSTUFAutoSaveData, responseAutoSave] = useCreateDataMutation();
 
   const saveData = async (selectedTab) => {
-    console.log("selectedTab==========>" + selectedTab);
-    console.log("save icon save success");
     switch (selectedTab) {
       case "Feed Setup":
         {
@@ -228,7 +227,6 @@ const FeedWaterHeader = ({ currentPanel }) => {
           if (Technology == "UF") {
             if (savewatertypeid > 0 || savewatersubtypeid > 0) {
               const response = await updateFeedsetupData(StoreDataFeed);
-              console.log(" updateFeedsetupData response", response);
               if (response.data.responseMessage == "Success") {
                 // const message = "Update preferences applied successfully!  ";
                 // handleShowAlert("success", message);
@@ -244,7 +242,6 @@ const FeedWaterHeader = ({ currentPanel }) => {
             }
           } else {
             const response = await updateFeedsetupData(StoreDataFeed);
-            console.log(" updateFeedsetupData response", response);
             if (response.data.responseMessage == "Success") {
               // const message = "Update preferences applied successfully!  ";
               // handleShowAlert("success", message);
@@ -269,14 +266,7 @@ const FeedWaterHeader = ({ currentPanel }) => {
           //   lstTechnologyLists,
           // };
           // await updateData(StoreData);
-          // console.log("addedTechnology",addedTechnology);
-          // console.log("lstTechnologyLists",lstTechnologyLists);
-          // console.log(
-          //   "save project case -2===========> syatem design." + JSON.stringify(StoreData)
-          // );
-          console.log("lstTechnologyLists");
           const flowvalue=feedWaterData.flowValue;
-          console.log("PK flowva;ue", flowvalue);
           const response = await updateData({
             Method: "masterdata/api/v1/SystemDesign",
             flowValue: (Number(GlobalUnitConversion(GlobalUnitConversionStore,feedWaterData.flowValue===undefined?100:feedWaterData.flowValue,"m³/h",unit.selectedUnits[1]).toFixed(2))),
@@ -726,18 +716,13 @@ const FeedWaterHeader = ({ currentPanel }) => {
           console.log("save project case1 IXD");
           var dummyListFinal = [];
           if (
-            ixStoreObj.viewReport === "true" &&
-            ixStore.evaluteExisting_ind == true
+            ixStoreObj.viewReport == "true" 
+            // &&ixStore.evaluteExisting_ind == true
           ) {
             dummyListFinal = ixStoreObj?.listFinalParamAdj;
           } else {
             dummyListFinal = ixStoreObj?.existingPlantDescription;
           }
-          console.log(
-            "PK dummyListFinal s",
-            ixStoreObj?.existingPlantDescription,
-            ixStoreObj?.listFinalParamAdj
-          );
           if (dummyListFinal.length <= 1) {
             let vesselCount = 0;
             if (ixStoreObj.resinName4 !== null) {
@@ -780,7 +765,7 @@ const FeedWaterHeader = ({ currentPanel }) => {
                 ixfpaRadioButtonID: 0,
               })
             );
-            if (vesselCount > 1) {
+            if (vesselCount < 1) {
               dummyListFinal = dummyArray;
             }
           }
@@ -874,7 +859,6 @@ const FeedWaterHeader = ({ currentPanel }) => {
                 Number.parseFloat(vesselWallThickness).toFixed(2),
             };
           });
-          console.log("PK dummyListFinal after s", dummyListFinal);
           /*----Unit conversion for regenenConditionPage start-----*/
           let [a, b] = resinVal;
           let cationTemp = resinVal[0]?.temperature;
@@ -1036,6 +1020,38 @@ const FeedWaterHeader = ({ currentPanel }) => {
           //   );
           // }
           /*----Unit conversion for Vessel Regeneration end-----*/
+          if(modeling!=="EvaluateExisting" || viewReport==false){
+            let vesselCount = ixStore.existingPlantDescription.length;
+            if (ixStoreObj.resinName4 !== null) {
+              vesselCount = 4;
+            } else if (ixStoreObj.resinName3 !== null) {
+              vesselCount = 3;
+            } else if (ixStoreObj.resinName2 !== null) {
+              vesselCount = 2;
+            } else {
+              vesselCount = 1;
+            }
+            var dummyArray1 = Array.from({ length: vesselCount }, (_, index) => ({
+              resinType: ixStoreObj.resinData[ixStoreObj[`resinName${index+1}`]],
+              resinName: ixStoreObj[`resinName${index+1}`],
+              resinId:ixStoreObj[`resinName${index+1}`]=="WAC"?ixResinID1:ixStoreObj[`resinName${index+1}`]=="SAC"?ixResinID2:ixStoreObj[`resinName${index+1}`]=="WBA"?ixResinID3:ixResinID4,
+              vesselNo: index + 1,
+              resinVolumeAsDelivered: 0,
+              vesselDiameter: 0,
+              resinBedHeightAsDelivered: 0,
+              resinBedStandardHeight: 0,
+              resinBedHeightAsExhausted: 0,
+              resinBedHeightAsRegenerated: 0,
+              inertResinVolume: 0,
+              inertBedHeight: 0,
+              freeBoard:0,
+              vesselCylindricalHeight: 0,
+              vesselWallThickness: 0,
+              pressureDropwithRecomQty: 0,
+              resinPackagingSize: 0,
+              ixfpaRadioButtonID: 0,
+            }));
+          }
           const MethodName = { Method: "ix/api/v1/IXData" };
           const IXData_Method_Body = {
             ...MethodName,
@@ -1083,17 +1099,12 @@ const FeedWaterHeader = ({ currentPanel }) => {
                 ["endpointConductivityVal"]: Number(anionendpointConduc?.toFixed(2)),
               },
             ],
-            listFinalParamAdj: dummyListFinal,
+            listFinalParamAdj: (modeling==="EvaluateExisting" || viewReport==true)?dummyListFinal:dummyArray1,
             treatmentName: "IXD",
           };
           let PostResponseValues = await IXData_PostData(IXData_Method_Body);
           navigateHome();
           dispatch(setIXDUpdate(false));
-
-          console.log(
-            "save responseMessage",
-            PostResponseValues.data.responseMessage
-          );
           if (PostResponseValues.data.responseMessage == "Success") {
             // toast.success("IXdata ,Record Updated successfully !", {
             //   position: toast.POSITION.TOP_RIGHT
@@ -1157,13 +1168,11 @@ const FeedWaterHeader = ({ currentPanel }) => {
               feedWaterData.projectID
             }&caseID=${feedWaterData.caseID}`;
       //  const url=`masterdata/api/v${1}/SystemDesign?userID=${1}&projectID=${projectid}`;
-      console.log("url value", url);
       getSystemData(url);
     }
   }, [response]);
   useEffect(() => {
     if (responseSystemData.isSuccess) {
-      console.log("PK kdufhdskjfhd secon", responseSystemData.data);
       dispatch(setNodeAndEdge({...responseSystemData.data,["flow"]:(Number(GlobalUnitConversion(GlobalUnitConversionStore,responseSystemData.data.flow,unit.selectedUnits[1],"m³/h").toFixed(2)))}));
       // dispatch(setNodeAndEdge(responseSystemData.data));
     }
@@ -1189,13 +1198,9 @@ const FeedWaterHeader = ({ currentPanel }) => {
   }, []);
 
   useEffect(() => {
-    console.log(responseData);
-
     if (responseData.isLoading) {
       console.log("Loading");
     } else {
-      console.log("Loading1");
-
       if (responseData.isSuccess === true) {
         console.log("Success");
 
@@ -1211,6 +1216,7 @@ const FeedWaterHeader = ({ currentPanel }) => {
     }
   }, [responseData]);
   const handleNavigate = () => {
+    dispatch(updateLeftpanel("masterdata/api/v1/ProjectRecent"));
     if (location.pathname === "/FeedWaterHome") {
       if (tab == "System Design" && isDataUpdated) {
         setSaveWarning(true);
@@ -1223,6 +1229,7 @@ const FeedWaterHeader = ({ currentPanel }) => {
       } else {
         navigate("/home");
         dispatch(updateTabAvailable({"FeedSetup":false,"IXD":false}));
+        dispatch(updateTabAvailableForUF({"FeedSetup":false,"UF":false}));
       }
     }
   };
@@ -1230,7 +1237,6 @@ const FeedWaterHeader = ({ currentPanel }) => {
   useEffect(() => {
     const headerChange =
       scrollDirection === "down" && feedCheck === "Feed Setup";
-    console.log("headerChange", headerChange);
     setHeader(headerChange);
   }, [scrollDirection]);
 
@@ -1289,7 +1295,6 @@ const FeedWaterHeader = ({ currentPanel }) => {
                       <li
                         onClick={() => {
                           handleOnclick(project);
-                          console.log("ProjectData", project);
                           navigate("/FeedWaterHome", {
                             state: {
                               title: project.projectName,

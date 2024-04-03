@@ -55,6 +55,7 @@ import GlobalUnitConversion from "../../../common/utils/GlobalUnitConversion";
 import { updateUnitFlag, updateUnitTypeFlow, updateUnitTypeFlux, updateUnitTypeGasFlow, updateUnitTypePower, updateUnitTypePressure, updateUnitTypeTemp } from "../../../common/utils/GlobalUnitConversionSlice";
 import { setFeedFlowRate } from "../systemdesign/processDiagramSlice";
 import { updateTabAvailable } from "../../../common/ReportIXDSlice";
+import { updateTabAvailableForUF } from "../../../common/ReportUFSlice";
 
 const UF = () => {
   const dispatch = useDispatch();
@@ -280,7 +281,7 @@ const UF = () => {
   }, [showInDropDown]);
 
   const getConfigForFiltrateFlux = () => {
-    console.log("*********** FF Debug : UF :  getConfigForFiltrateFlux : Called : ");
+    // console.log("*********** FF Debug : UF :  getConfigForFiltrateFlux : Called : ");
     const filtrateFluxRange = ufFluxGuideline.filter(
       (config) =>
         config.waterSubTypeId == waterSubTypeID &&
@@ -313,13 +314,13 @@ const UF = () => {
         FFMIN
       );
 
-      console.log("*********** FF Debug :UF: tempDesign : ",tempDesign);
-      console.log("*********** FF Debug :UF: moduleType : ",filtrateFluxRange[0].moduleType);
-      console.log("*********** FF Debug :UF: waterSubTypeID : ",waterSubTypeID);
-      console.log("*********** FF Debug :UF: typicalValue : ", filtrateFluxRange[0].typicalValue);
-      console.log("*********** FF Debug :UF: TCF : ", TCF);
-      console.log("*********** FF Debug :UF: Default_Corrected computed: ", Default_Corrected);
-      console.log("*********** FF Debug : UF :  getConfigForFiltrateFlux : Filterateflux calculated : ",Filterateflux);
+      // console.log("*********** FF Debug :UF: tempDesign : ",tempDesign);
+      // console.log("*********** FF Debug :UF: moduleType : ",filtrateFluxRange[0].moduleType);
+      // console.log("*********** FF Debug :UF: waterSubTypeID : ",waterSubTypeID);
+      // console.log("*********** FF Debug :UF: typicalValue : ", filtrateFluxRange[0].typicalValue);
+      // console.log("*********** FF Debug :UF: TCF : ", TCF);
+      // console.log("*********** FF Debug :UF: Default_Corrected computed: ", Default_Corrected);
+      // console.log("*********** FF Debug : UF :  getConfigForFiltrateFlux : Filterateflux calculated : ",Filterateflux);
 
       const filtrateFluxConfig = {
         label: "Filtrate Flux",
@@ -334,9 +335,9 @@ const UF = () => {
       };
       return [{ ...filtrateFluxConfig }];
     } else {
-      console.log(
-        `No config available for FILTRATE FLUX For waterSubTypeID: ${waterSubTypeID} and moduleType: ${selectedUFModule.moduleType}`
-      );
+      // console.log(
+      //   `No config available for FILTRATE FLUX For waterSubTypeID: ${waterSubTypeID} and moduleType: ${selectedUFModule.moduleType}`
+      // );
       return [
         {
           label: "Filtrate Flux",
@@ -383,19 +384,21 @@ const UF = () => {
     ];
     return FFFlowRange;
   };
-  const getConfigForAirFlow = () => {
+  const getConfigForAirFlow = (moduleID) => {
     //based on module id
     const genericRange = ufInputRangeConfig.filter(
       (config) => config.label == "Air Flow"
-    );
+    );    
+    const currentModuleDetails = getModuleDetails(moduleID);
     const airFlowRange = [
       {
         ...genericRange[0],
-        minValue: selectedUFModule.aS_Flow_min,
-        maxValue: selectedUFModule.aS_Flow_max,
-        defaultValue: selectedUFModule.aS_Flow_std,
+        minValue: currentModuleDetails.aS_Flow_min,
+        maxValue: currentModuleDetails.aS_Flow_max,
+        defaultValue: currentModuleDetails.aS_Flow_std,
       },
     ];
+    // console.log("airFlowRange----UF", airFlowRange);
     return airFlowRange;
   };
   let normalRange=[];
@@ -481,7 +484,7 @@ const UF = () => {
       rangeOnWaterSubType?.length > 0 ? rangeOnWaterSubType : normalRange;
     return rangeConfig;
   };
-  const getFieldRangeConfig = (label) => {
+  const getFieldRangeConfig = (label, moduleID) => {
     if (fieldMapping[label] == "Filtrate Flux") {
       return getConfigForFiltrateFlux();
     } else if (fieldMapping[label] == "Forward Flush Flow") {
@@ -489,12 +492,13 @@ const UF = () => {
       return getConfigForForwardFlushFlow();
     } else if (fieldMapping[label] == "Air Flow") {
       //based on module
-      return getConfigForAirFlow();
+      return getConfigForAirFlow(moduleID);
     } else {
       //based on waterSubTypeID
-      return getConfigForUFFields(label);
+        return getConfigForUFFields(label);
     }
   };
+
   const getModuleDetails = (moduleID) => {
     const selectedModules = ufModules.filter((m) => m.ufmoduleId == moduleID);
     if (selectedModules.length > 0 && selectedModules[0]) {
@@ -568,9 +572,12 @@ const UF = () => {
                   ? "1"
                   : UFData.uFBWProtocolID;
             }
-
+            let moduleID =
+                responseUFDetails.data.uFModuleID == 0
+                  ? "24"
+                  : responseUFDetails.data.uFModuleID;
             storeObj["disOxidantEnabled_Ind_CEB"] = false;
-            const config = getFieldRangeConfig(x);
+            const config = getFieldRangeConfig(x, moduleID);
             if (config?.length > 0) {
               UFDefaultConfigs[x] = config[0];
             } else {
@@ -581,7 +588,7 @@ const UF = () => {
               storeObj[x] = "0";
             }
             if (obj[x] == 0) {
-              const fieldConfiguration = getFieldRangeConfig(x);
+              const fieldConfiguration = getFieldRangeConfig(x,moduleID);
               if (fieldConfiguration?.length > 0) {
                 storeObj[x] =
                   fieldConfiguration[0]?.defaultValue == 0
@@ -632,8 +639,8 @@ const UF = () => {
             }
 
             if(UFData.isWaterSubTypeChanged == true || UFData.isDesignTempChanged == true){
-              console.log("FeedSetup Config Changed - YES");
-              const fieldConfig = getFieldRangeConfig(x);
+              // console.log("FeedSetup Config Changed - YES");
+              const fieldConfig = getFieldRangeConfig(x, moduleID);
               if (fieldConfig?.length > 0) {
                 storeObj[x] = fieldConfig[0]?.defaultValue;
                 if(x==="filtrateFlux" || x==="backwashFlux" || x==="cEBFlux"){
@@ -1002,7 +1009,7 @@ const UF = () => {
           dispatch(updateUFDefaultInputRangeConfig(UFDefaultConfigs));
         } else {
           dispatch(setCustomAvail(false));
-          const storeObj = { ...responseUFDetails.data };
+          const storeObj = JSON.parse(JSON.stringify(responseUFDetails.data));
           if (obj["alkaliEnabled_Ind_CEB"]) {
             let chem = showInDropDown.find(
               (item) => item.chemicalCat == "Base"
@@ -1243,23 +1250,39 @@ const UF = () => {
             storeObj.oxidantChemId_CIP = 0;
             storeObj.oxidantValue_CIP = 0;
           }
+          /*  ---- Setting module selection ------- */
+          let moduleID =responseUFDetails.data.uFModuleID == 0
+                        ? "24"
+                        : responseUFDetails.data.uFModuleID;
+          storeObj["uFModuleID"] = moduleID;
+          const activeModuleDetails = getModuleDetails(moduleID);
+          dispatch(updateActiveUFModule(activeModuleDetails));
+          storeObj["uFBWProtocolID"] = activeModuleDetails?.newModuleLongName?.indexOf("UXA") >= 0
+            ? "1"
+            : storeObj.uFBWProtocolID==0?2:storeObj.uFBWProtocolID;
+          // dispatch(updateUFStore(storeObj));
+          /* ------------------------------------------------------- */
 
           UFInputKeys?.map((x) => {
-            const config = getFieldRangeConfig(x);
-            if (config?.length > 0) {
-              UFDefaultConfigs[x] = config[0];
-            } else {
-              UFDefaultConfigs[x] = {};
-            }
-            //Recompute UF Field values if WaterSubType or DesignTemp is changed.
-            if(UFData.isWaterSubTypeChanged == true || UFData.isDesignTempChanged == true){
-              console.log("FeedSetup Config Changed - YES");
-              const fieldConfig = getFieldRangeConfig(x);
-              if (fieldConfig?.length > 0) {
-                storeObj[x] = fieldConfig[0]?.defaultValue;
-              } 
-            }else{
-              console.log("FeedSetup Config Changed - NO");
+            if(x != "uFModuleID"){
+              const config = getFieldRangeConfig(x,moduleID);
+              if (config?.length > 0) {
+                UFDefaultConfigs[x] = config[0];
+              } else {
+                UFDefaultConfigs[x] = {};
+              }
+  
+              //Recompute UF Field values if WaterSubType or DesignTemp is changed.
+              if(UFData.isWaterSubTypeChanged == true || UFData.isDesignTempChanged == true){
+                // console.log("FeedSetup Config Changed - YES");
+                const fieldConfig = getFieldRangeConfig(x,moduleID);
+                if (fieldConfig?.length > 0) {
+                  storeObj[x] = fieldConfig[0]?.defaultValue;
+                } 
+              }
+              // else{
+              //   console.log("FeedSetup Config Changed - NO");
+              // }
             }
           });
           if(unit.selectedUnits[2]!=="°C"){
@@ -1765,6 +1788,7 @@ const UF = () => {
   const handleNavigate = () => {
     navigate("/home");
     dispatch(updateTabAvailable({"FeedSetup":false,"IXD":false}));
+    dispatch(updateTabAvailableForUF({"FeedSetup":false,"UF":false}));
   };
   const selectPanel = (activeTab) => {
     switch (activeTab) {

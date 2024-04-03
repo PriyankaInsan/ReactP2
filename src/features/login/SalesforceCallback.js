@@ -82,6 +82,14 @@ const SalesforceCallback = () => {
           "accessTokens",
           JSON.stringify(tokenResponse?.data)
         );
+        let data = sessionStorage.getItem("userLogedIn");
+        console.log("sessionData",data);
+        if(data){
+          sessionStorage.setItem("userLogedIn", "false");
+        }else{
+          sessionStorage.setItem("userLogedIn", "true");
+        }
+        
         decodeIDToken(tokenResponse?.data?.id_token);
       } else {
         // console.log("Token Exchange Error Response: ",tokenResponse);

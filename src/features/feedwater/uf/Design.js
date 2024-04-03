@@ -155,7 +155,7 @@ const Design = () => {
     }
   };
   const getConfigForFiltrateFlux = (moduleSelected) => {
-    console.log("*********** FF Debug : Design :  getConfigForFiltrateFlux : Called : ");
+    // console.log("*********** FF Debug : Design :  getConfigForFiltrateFlux : Called : ");
     const filtrateFluxRange = ufFluxGuideline.filter(
       (config) =>
         config.waterSubTypeId == waterSubTypeID &&
@@ -187,16 +187,16 @@ const Design = () => {
         Math.min(Number(Default_Corrected).toFixed(2), FFMAX),
         FFMIN
       );
-      console.log("*********** FF Debug :Design: tempDesign : ",tempDesign);
-      console.log("*********** FF Debug :Design: moduleType : ",filtrateFluxRange[0].moduleType);
-      console.log("*********** FF Debug :Design: waterSubTypeID : ",waterSubTypeID);
-      console.log("*********** FF Debug :Design: typicalValue : ", filtrateFluxRange[0].typicalValue);
-      console.log("*********** FF Debug :Design: TCF : ", TCF);
-      console.log("*********** FF Debug :Design: Default_Corrected computed: ", Default_Corrected);
-      console.log(
-        "*********** FF Debug : Design :  getConfigForFiltrateFlux : Filterateflux calculated : ",
-        Filterateflux
-      );
+      // console.log("*********** FF Debug :Design: tempDesign : ",tempDesign);
+      // console.log("*********** FF Debug :Design: moduleType : ",filtrateFluxRange[0].moduleType);
+      // console.log("*********** FF Debug :Design: waterSubTypeID : ",waterSubTypeID);
+      // console.log("*********** FF Debug :Design: typicalValue : ", filtrateFluxRange[0].typicalValue);
+      // console.log("*********** FF Debug :Design: TCF : ", TCF);
+      // console.log("*********** FF Debug :Design: Default_Corrected computed: ", Default_Corrected);
+      // console.log(
+      //   "*********** FF Debug : Design :  getConfigForFiltrateFlux : Filterateflux calculated : ",
+      //   Filterateflux
+      // );
 
       const filtrateFluxConfig = {
         label: "Filtrate Flux",

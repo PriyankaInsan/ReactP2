@@ -66,6 +66,7 @@ import {updateUnitTypeFlow,
   updateUnitTypeOrganic
 } from "../../../common/utils/GlobalUnitConversionSlice";
 import { updateTabAvailable } from "../../../common/ReportIXDSlice";
+import { updateTabAvailableForUF } from "../../../common/ReportUFSlice";
 
 const IXD = () => {
   const dispatch = useDispatch();
@@ -1896,6 +1897,7 @@ const IXD = () => {
   const handleNavigate = () => {
     navigate("/home");
     dispatch(updateTabAvailable({"FeedSetup":false,"IXD":false}));
+    dispatch(updateTabAvailableForUF({"FeedSetup":false,"UF":false}));
   };
   return (
     <>

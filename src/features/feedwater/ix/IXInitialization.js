@@ -144,12 +144,13 @@ const IXInitialization = () => {
         }, 0);
       }else{
         valueIsSafe = true;
+        let newValue=e.target.value.toString().split(".")[1]?.length>7?parseFloat(e.target.value).toFixed(7):parseFloat(e.target.value).toFixed(e.target.value.toString().split(".")[1]?.length);
         dispatch(
-          updateIXStore({ ...ixStore, [e.target.name]: parseFloat(e.target.value).toFixed(2) })
+          updateIXStore({ ...ixStore, [e.target.name]: newValue })
         );
       }
     } else if (e.target.name === "operatingCycle_Lenght_txt") {
-      if (ixStore?.Hrs_Day_ind === true) {
+      if (ixStore?.hrs_Day_ind === true) {
         if (
           e.target.value < 3 ||
           e.target.value > 10000 ||
@@ -164,6 +165,13 @@ const IXInitialization = () => {
           setTimeout(() => {
             e.target.focus();
           }, 0);
+        }
+        else{
+          valueIsSafe = true;
+          let newValue=e.target.value.toString().split(".")[1]?.length>7?parseFloat(e.target.value).toFixed(7):parseFloat(e.target.value).toFixed(e.target.value.toString().split(".")[1]?.length);
+          dispatch(
+            updateIXStore({ ...ixStore, [e.target.name]:newValue })
+          );
         }
       } else {
         if (
@@ -182,6 +190,10 @@ const IXInitialization = () => {
           }, 0);
         }else{
           valueIsSafe = true;
+          let newValue=e.target.value.toString().split(".")[1]?.length>7?parseFloat(e.target.value).toFixed(7):parseFloat(e.target.value).toFixed(e.target.value.toString().split(".")[1]?.length);
+          dispatch(
+            updateIXStore({ ...ixStore, [e.target.name]:newValue})
+          );
         }
       }
     } else if (e.target.name === "Bypassed") {
@@ -216,7 +228,8 @@ const IXInitialization = () => {
       }
     } else if (e.target.name === "trains_StandBy") {
       if (ixStore.trains_Online == "1") {
-        if (e.target.value != 0) {
+        //if (e.target.value != 0) {
+          if(e.target.value < 0 || e.target.value > 5){
           console.log("e.target.value-", parseInt(e.target.value));
           setIsSumValid(true);
           setautoFocusvalue(true);
@@ -371,7 +384,7 @@ const IXInitialization = () => {
     console.log("e.target.name" + " " + e.target.name);
     console.log("e.target.name" + " " + e.target.value);
     dispatch(
-      updateIXStore({ ...ixStore, [e.target.name]: parseFloat(e.target.value).toFixed(0) })
+      updateIXStore({ ...ixStore, [e.target.name]: parseFloat(e.target.value) })
     );
   };
   const txtChange = (e) => {
@@ -417,9 +430,13 @@ const IXInitialization = () => {
   //const operatingCycleOptions =[ {OperationId:true,OperationName: "Hours"}, {OperationId:false,OperationName:"Days"}];
   const handleSelectChange = (e) => {
     if (e.target.value === "Hours") {
-      dispatch(updateIXStore({ ...ixStore, ["Hrs_Day_ind"]: true }));
+      dispatch(updateIXStore({ ...ixStore, ["hrs_Day_ind"]: true }));
     } else {
-      dispatch(updateIXStore({ ...ixStore, ["Hrs_Day_ind"]: false }));
+      let newValue =  ixStore.operatingCycle_Lenght_txt;
+      if( ixStore.operatingCycle_Lenght_txt>417){
+        newValue =  parseFloat(ixStore.operatingCycle_Lenght_txt/24).toFixed(7);
+      }
+      dispatch(updateIXStore({ ...ixStore, ["hrs_Day_ind"]: false,["operatingCycle_Lenght_txt"]: newValue}));
     }
     setSelectedOption(e.target.value);
   };
@@ -567,9 +584,9 @@ const IXInitialization = () => {
                     unitBgColor="transparent"
                     disabled={false}
                     isWarning={
-                      parseInt(ixStore.trains_Online) > 20 ? true : false
+                      false
                     }
-                    isError={ixStore.trains_Online < 1 ? true : false}
+                    isError={ixStore.trains_Online < 1 || parseInt(ixStore.trains_Online) > 20 ? true : false}
                     onClick
                     inputText={
                       ixStore.trains_Online < 1 ? (
@@ -602,7 +619,7 @@ const IXInitialization = () => {
                   <InputWithIcon
                     unitBgColor="transparent"
                     disabled={false}
-                    isError={false}
+                    isError={ixStore.trains_Online==1?(ixStore.trains_StandBy < 0 || ixStore.trains_StandBy > 5 ? true : false):(ixStore.trains_StandBy < 1 || ixStore.trains_StandBy > 5 ? true : false)}
                     isWarning={false}
                     onClick
                     inputText={<CloseCircleGreenIcon />}
@@ -618,7 +635,7 @@ const IXInitialization = () => {
                   />
                   <InputReferenceText
                     refText={
-                      ixStore.trains_Online == "1" ? "Ranges 0" : "Ranges 1-5"
+                      ixStore.trains_Online == "1" ? "Ranges 0-5" : "Ranges 1-5"
                     }
                   />
                   {/* <Form.Label># of Trains-Standby</Form.Label>
@@ -685,13 +702,13 @@ const IXInitialization = () => {
                 <div className="bypassed">
                   <CustomLabel
                     label="% Bypassed"
-                    disabled={ixStore.bufferTank_ind == true?false:ixStore.trains_Online <= 1}
+                    disabled={ixStore.bufferTank_ind == true?false:ixStore.trains_StandBy <= 1}
                   />
                   <InputWithIcon
                     onKeyDown={(evt) => ["e", "E", "+", "-","ArrowUp","ArrowDown"].includes(evt.key) && evt.preventDefault()}
                     type="number"
                     id="bypassed"
-                    disabled={ ixStore.bufferTank_ind == true?false:ixStore.trains_Online <= 1}
+                    disabled={ ixStore.bufferTank_ind == true?false:ixStore.trains_StandBy == 0}
                     name="Bypassed"                    onClick
                     onChange={txtChange}
                     value={ixStore.Bypassed === "" ? 0 : ixStore.Bypassed}
@@ -700,7 +717,7 @@ const IXInitialization = () => {
                     onBlur={handleBlur}
                     onFocus={() => handleFocus(4)}
                     isFocused={isFocused === 4}
-                    isError={false}
+                    isError={ixStore.Bypassed < 0 || ixStore.Bypassed > 95 ? true : false}
                     isWarning={false}
                   />
                   <InputReferenceText refText="Ranges 0 – 95%" />
@@ -825,11 +842,11 @@ const IXInitialization = () => {
                     ixStore.operatingCycle_Lenght_txt
                   }
                   selectedValue={
-                    ixStore?.Hrs_Day_ind == false ? "Days" : "Hours"
+                    ixStore?.hrs_Day_ind == false ? "Days" : "Hours"
                   }
                   onValueChange={handleSelectChange}
-                  isError={ ixStore?.Hrs_Day_ind === true?(10001>ixStore.operatingCycle_Lenght_txt?false:true)
-                    :(418>ixStore.operatingCycle_Lenght_txt?false:true)}
+                  isError={ ixStore?.hrs_Day_ind === true?((10000<ixStore.operatingCycle_Lenght_txt || 3>ixStore.operatingCycle_Lenght_txt || !ixStore.operatingCycle_Lenght_txt))
+                    :((417<ixStore.operatingCycle_Lenght_txt || 1>ixStore.operatingCycle_Lenght_txt || !ixStore.operatingCycle_Lenght_txt))}
                   options={operatingCycleOptions}
                   onBlur={handleBlur}
                   onFocus={() => handleFocus(6)}
@@ -844,7 +861,7 @@ const IXInitialization = () => {
                 {/* </InputGroup> */}
                 <InputReferenceText
                   refText={
-                    ixStore?.Hrs_Day_ind === false
+                    ixStore?.hrs_Day_ind === false
                       ?  "Range 1–417"
                       : "Range 3–10,000"
                   }
@@ -880,9 +897,10 @@ const IXInitialization = () => {
                   onChange={txtChangeEvalute}
                   value={ixStore.space_velocity_txt}
                   inputText={unit.selectedUnits[10]}
-                   onBlur={handleBlur}
+                  onBlur={handleBlur}
                   onFocus={() => handleFocus(7)}
                   isFocused={isFocused === 7}
+                  isError={ixStore.space_velocity_txt < 5 || ixStore.space_velocity_txt> 60 || !ixStore.space_velocity_txt ? true : false}
                 />
                 {/* <InputGroup.Text>BV/h</InputGroup.Text>
                 </InputGroup> */}

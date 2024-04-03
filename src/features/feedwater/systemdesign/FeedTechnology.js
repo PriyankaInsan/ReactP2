@@ -41,6 +41,7 @@ import StyledCard from "../../../common/styles/components/cards/CustomCard";
 import ErrorPopup from "../../../common/utils/ErrorPopup";
 import GlobalUnitConversion from "../../../common/utils/GlobalUnitConversion";
 import { updateUnitFlag, updateUnitTypeFlow } from "../../../common/utils/GlobalUnitConversionSlice";
+import { updateViewReport } from "../ix/IXDSlice";
 
 let id = 0;
 const getId = () => `${id++}`;
@@ -180,6 +181,7 @@ const FeedTechnology = () => {
         data: data,
       };
       dispatch(addNode(newNode));
+      dispatch(updateViewReport("false"));
     } else {
       if (technologyAdded) {
         setTechAddedError(true);
@@ -196,6 +198,7 @@ const FeedTechnology = () => {
           data: data,
         };
         dispatch(addNode(newNode));
+        dispatch(updateViewReport("false"));
       }
     }
     event.preventDefault();

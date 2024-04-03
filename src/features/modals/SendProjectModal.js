@@ -263,7 +263,7 @@ const SearchableDropdown = ({
   const filter = (options) => {
     return options.filter(
       (option) =>
-        option?.firstName?.toLowerCase().indexOf(query.toLowerCase()) > -1
+        option?.email?.toLowerCase().indexOf(query.toLowerCase()) > -1
     );
   };
 

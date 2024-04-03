@@ -32,10 +32,15 @@ import ProjectSaveWarning from "../../features/feedwater/systemdesign/ProjectSav
 import CustomHeading from "../styles/components/headings/CustomHeading";
 import { colors } from "../styles/Theme";
 import { updateMenuIconHeader } from "../../features/feedwater/uf/UFSlice";
-import { updateIXMenuIconHeader, updateIXStore } from "../../features/feedwater/ix/IXDSlice";
+import {
+  updateIXMenuIconHeader,
+  updateIXStore,
+} from "../../features/feedwater/ix/IXDSlice";
 import { setLoading } from "../../features/feedwater/systemdesign/processDiagramSlice";
 import GlobalUnitConversion from "../utils/GlobalUnitConversion";
 import { updateTabAvailable } from "../ReportIXDSlice";
+import { updateTabAvailableForUF } from "../ReportUFSlice";
+import { updateLeftpanel } from "../../features/menu/SideMenuSlice";
 
 const Header = ({ showSideMenu, setShowMenuIcon }) => {
   const dispatch = useDispatch();
@@ -101,7 +106,7 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
   /* Formatting LastLoggedIn */
   if (lastLoggedIn) {
     const originalDate = new Date(lastLoggedIn);
-    const isDate = new Date(originalDate.getTime() + 5.5 * 60 * 60 * 1000);
+    const isDate = new Date(originalDate.getTime());
     const options = {
       year: "numeric",
       month: "short",
@@ -110,10 +115,13 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
       minute: "2-digit",
       second: "2-digit",
       hour12: true,
-      timeZone: "Europe/Paris",
+      // timeZone: "Europe/Paris",
     };
 
     formattedDate = isDate.toLocaleString("en-US", options);
+    sessionStorage.setItem("lastLoginDate", formattedDate);
+  } else {
+    formattedDate = sessionStorage.getItem("lastLoginDate");
   }
   const [activeMenu, setActiveMenu] = useState(null);
   const [changeNotificationIcon, setChangeNotificationIcon] = useState(null);
@@ -134,8 +142,12 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
   //   }
   // }, 60000);
   // unit conversion
-  const GlobalUnitConversionStore = useSelector((state) => state.GUnitConversion.data);
-  const unit = useSelector((state) => state.projectInfo?.projectConfig?.unitConfig);
+  const GlobalUnitConversionStore = useSelector(
+    (state) => state.GUnitConversion.data
+  );
+  const unit = useSelector(
+    (state) => state.projectInfo?.projectConfig?.unitConfig
+  );
 
   const tab = useSelector((state) => state.tabData.tab);
   const FeedStreamData = useSelector(
@@ -149,6 +161,7 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
   );
 
   const handleNavigate = () => {
+    dispatch(updateLeftpanel("masterdata/api/v1/ProjectRecent"));
     if (location.pathname === "/FeedWaterHome") {
       if (tab == "System Design" && isDataUpdated) {
         setSaveWarning(true);
@@ -156,12 +169,18 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
         setSaveWarning(true);
       } else if (tab == "UF" && isUfDataUpdated) {
         setSaveWarning(true);
-      }else if (tab == "IXD" && ixStoreObj.isIXDDataUpdated) {
+      } else if (tab == "IXD" && ixStoreObj.isIXDDataUpdated) {
         setSaveWarning(true);
       } else {
         navigate("/home");
-        dispatch(updateTabAvailable({"FeedSetup":false,"IXD":false}));
+        dispatch(updateTabAvailable({ FeedSetup: false, IXD: false }));
+        dispatch(updateTabAvailableForUF({ FeedSetup: false, UF: false }));
       }
+    } else {
+      //dispatch(updateLeftpanel("masterdata/api/v1/ProjectRecent"));
+     // setActiveMenuItem(listName);
+     // dispatch(updateLoader(false));
+      window.location.reload();
     }
   };
 
@@ -182,14 +201,70 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
     isCompactionFlux: UFData.isCompactionFlux,
     uFDesignFluxID: parseInt(UFData.uFDesignFluxID),
     caseTreatmentID: parseInt(UFData.caseTreatmentID),
-    filtrateFlux: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.filtrateFlux,"LMH",unit.selectedUnits[4]).toFixed(2)),
-    backwashFlux: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.backwashFlux,"LMH",unit.selectedUnits[4]).toFixed(2)),
-    cEBFlux: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.cEBFlux,"LMH",unit.selectedUnits[4])),
-    forwardFlushFlow: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.forwardFlushFlow,"m³/h",unit.selectedUnits[1]).toFixed(2)),
-    airFlow: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.airFlow,"Nm³/h",unit.selectedUnits[18]).toFixed(2)),
-    aerationAirFlow: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.aerationAirFlow,"Nm³/h",unit.selectedUnits[18]).toFixed(2)),
-    recycleFlowRate: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.recycleFlowRate,"m³/h",unit.selectedUnits[1]).toFixed(2)),
-    recycleFlowRate_MiniCIP: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.recycleFlowRate_MiniCIP,"m³/h",unit.selectedUnits[1]).toFixed(2)),
+    filtrateFlux: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.filtrateFlux,
+        "LMH",
+        unit.selectedUnits[4]
+      ).toFixed(2)
+    ),
+    backwashFlux: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.backwashFlux,
+        "LMH",
+        unit.selectedUnits[4]
+      ).toFixed(2)
+    ),
+    cEBFlux: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.cEBFlux,
+        "LMH",
+        unit.selectedUnits[4]
+      )
+    ),
+    forwardFlushFlow: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.forwardFlushFlow,
+        "m³/h",
+        unit.selectedUnits[1]
+      ).toFixed(2)
+    ),
+    airFlow: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.airFlow,
+        "Nm³/h",
+        unit.selectedUnits[18]
+      ).toFixed(2)
+    ),
+    aerationAirFlow: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.aerationAirFlow,
+        "Nm³/h",
+        unit.selectedUnits[18]
+      ).toFixed(2)
+    ),
+    recycleFlowRate: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.recycleFlowRate,
+        "m³/h",
+        unit.selectedUnits[1]
+      ).toFixed(2)
+    ),
+    recycleFlowRate_MiniCIP: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.recycleFlowRate_MiniCIP,
+        "m³/h",
+        unit.selectedUnits[1]
+      ).toFixed(2)
+    ),
     uFModuleID: parseInt(UFData.uFModuleID),
     flow_FF1: Number(UFData.flow_FF1),
     flow_FF2: Number(UFData.flow_FF2),
@@ -240,10 +315,38 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
     radMR2: UFData.radMR2,
     radMR3: UFData.radMR3,
     uFFiltrationID: Number(UFData.uFFiltrationID),
-    backwash_Filtration: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.backwash_Filtration,"bar",unit.selectedUnits[3]).toFixed(2)),
-    acidCEB_Filtration: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.acidCEB_Filtration,"bar",unit.selectedUnits[3]).toFixed(2)),
-    alkaliCEB_Filtration: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.alkaliCEB_Filtration,"bar",unit.selectedUnits[3]).toFixed(2)),
-    cIP_Filtration: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.cIP_Filtration,"bar",unit.selectedUnits[3]).toFixed(2)),
+    backwash_Filtration: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.backwash_Filtration,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    acidCEB_Filtration: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.acidCEB_Filtration,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    alkaliCEB_Filtration: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.alkaliCEB_Filtration,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    cIP_Filtration: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.cIP_Filtration,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
     miniCIP_Filtration: Number(UFData.miniCIP_Filtration),
     strainerRecovery: Number(UFData.strainerRecovery),
     strainerSize: Number(UFData.strainerSize),
@@ -254,16 +357,79 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
     bWTank: Number(UFData.bWTank),
     cIPTank: Number(UFData.cIPTank),
     uFEquipmentPressureID: Number(UFData.uFEquipmentPressureID),
-    maxAirScourPressure: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.maxAirScourPressure,"bar",unit.selectedUnits[3]).toFixed(2)),
-    maxAirProcPressure: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.maxAirProcPressure,"bar",unit.selectedUnits[3]).toFixed(2)),
-    filteratePressure: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.filteratePressure,"bar",unit.selectedUnits[3]).toFixed(2)),
-    nonIntegraPacTrainPresDrop: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.nonIntegraPacTrainPresDrop,"bar",unit.selectedUnits[3]).toFixed(2)),
-    integraPacFiltrationPreDrop: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.integraPacFiltrationPreDrop,"bar",unit.selectedUnits[3]).toFixed(2)),
-    backwashPipingPreDrop: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.backwashPipingPreDrop,"bar",unit.selectedUnits[3]).toFixed(2)),
-    cIPPipingPreDrop: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.cIPPipingPreDrop,"bar",unit.selectedUnits[3]).toFixed(2)),
+    maxAirScourPressure: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.maxAirScourPressure,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    maxAirProcPressure: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.maxAirProcPressure,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    filteratePressure: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.filteratePressure,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    nonIntegraPacTrainPresDrop: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.nonIntegraPacTrainPresDrop,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    integraPacFiltrationPreDrop: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.integraPacFiltrationPreDrop,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    backwashPipingPreDrop: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.backwashPipingPreDrop,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
+    cIPPipingPreDrop: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.cIPPipingPreDrop,
+        "bar",
+        unit.selectedUnits[3]
+      ).toFixed(2)
+    ),
     uFPowerID: Number(UFData.uFPowerID),
-    pLCPowerReqPertrain: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.pLCPowerReqPertrain,"kW",unit.selectedUnits[9]).toFixed(2)),
-    volvePowerReqPerTrain: Number(GlobalUnitConversion(GlobalUnitConversionStore,UFData.volvePowerReqPerTrain,"kW",unit.selectedUnits[9]).toFixed(2)),
+    pLCPowerReqPertrain: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.pLCPowerReqPertrain,
+        "kW",
+        unit.selectedUnits[9]
+      ).toFixed(2)
+    ),
+    volvePowerReqPerTrain: Number(
+      GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        UFData.volvePowerReqPerTrain,
+        "kW",
+        unit.selectedUnits[9]
+      ).toFixed(2)
+    ),
     uFValvesID: Number(UFData.uFValvesID),
     valvesPerTrain: Number(UFData.valvesPerTrain),
     valveOpenCloseDuration: Number(UFData.valveOpenCloseDuration),
@@ -303,7 +469,7 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
     heatingStepDuration: Number(UFData.heatingStepDuration),
     cip_LSI: Number(UFData.cip_LSI),
     recycleDuration: Number(UFData.recycleDuration),
-    recycleTemperature:Number(
+    recycleTemperature: Number(
       GlobalUnitConversion(
         GlobalUnitConversionStore,
         UFData.recycleTemperature,
@@ -382,12 +548,25 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
       addedTechnology.map((item) => {
         item.id > 0 ? lstTechnologyLists.push({ technologyID: item.id }) : null;
       });
-      console.log("PK feedWaterData",feedWaterData);
       updateData({
         Method: "masterdata/api/v1/SystemDesign",
         ...feedWaterData,
-        flowValue: (Number(GlobalUnitConversion(GlobalUnitConversionStore,feedWaterData.flowValue,"m³/h",unit.selectedUnits[1]).toFixed(2))),
-        flow: (Number(GlobalUnitConversion(GlobalUnitConversionStore,feedWaterData.flow,"m³/h",unit.selectedUnits[1]).toFixed(2))),
+        flowValue: Number(
+          GlobalUnitConversion(
+            GlobalUnitConversionStore,
+            feedWaterData.flowValue,
+            "m³/h",
+            unit.selectedUnits[1]
+          ).toFixed(2)
+        ),
+        flow: Number(
+          GlobalUnitConversion(
+            GlobalUnitConversionStore,
+            feedWaterData.flow,
+            "m³/h",
+            unit.selectedUnits[1]
+          ).toFixed(2)
+        ),
         userID: user_id,
         processMap: { nodes: nodes, edges: edges },
         lstTechnologyLists,
@@ -484,31 +663,105 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
         dummyListFinal = dummyArray;
       }
     }
-    let list=[...dummyListFinal];
+    let list = [...dummyListFinal];
     dummyListFinal = list.map((item, index) => {
-      let resinVolumeAsDelivered=GlobalUnitConversion(GlobalUnitConversionStore,item.resinVolumeAsDelivered,"m³",unit.selectedUnits[12]);
-      let inertResinVolume=GlobalUnitConversion(GlobalUnitConversionStore,item.inertResinVolume,"m³",unit.selectedUnits[12]);
-      let vesselDiameter=GlobalUnitConversion(GlobalUnitConversionStore,item.vesselDiameter,"mm",unit.selectedUnits[8]);
-      let resinBedHeightAsDelivered=GlobalUnitConversion(GlobalUnitConversionStore,item.resinBedHeightAsDelivered,"mm",unit.selectedUnits[8]);
-      let resinBedStandardHeight=GlobalUnitConversion(GlobalUnitConversionStore,item.resinBedStandardHeight,"mm",unit.selectedUnits[8]);
-      let resinBedHeightAsRegenerated=GlobalUnitConversion(GlobalUnitConversionStore,item.resinBedHeightAsRegenerated,"mm",unit.selectedUnits[8]);
-      let resinBedHeightAsExhausted=GlobalUnitConversion(GlobalUnitConversionStore,item.resinBedHeightAsExhausted,"mm",unit.selectedUnits[8]);
-      let inertBedHeight=GlobalUnitConversion(GlobalUnitConversionStore,item.inertBedHeight,"mm",unit.selectedUnits[8]);
-      let vesselCylindricalHeight=GlobalUnitConversion(GlobalUnitConversionStore,item.vesselCylindricalHeight,"mm",unit.selectedUnits[8]);
-      let vesselWallThickness=GlobalUnitConversion(GlobalUnitConversionStore,item.vesselWallThickness,"mm",unit.selectedUnits[8]);
-      return { ...item, ["resinVolumeAsDelivered"]: Number.parseFloat(resinVolumeAsDelivered).toFixed(2),["inertResinVolume"]: Number.parseFloat(inertResinVolume).toFixed(2),["vesselDiameter"]: Number.parseFloat(vesselDiameter).toFixed(2),["resinBedHeightAsDelivered"]: Number.parseFloat(resinBedHeightAsDelivered).toFixed(2),["resinBedStandardHeight"]: Number.parseFloat(resinBedStandardHeight).toFixed(2),["resinBedHeightAsRegenerated"]: Number.parseFloat(resinBedHeightAsRegenerated).toFixed(2),["resinBedHeightAsExhausted"]: Number.parseFloat(resinBedHeightAsExhausted).toFixed(2),["inertBedHeight"]: Number.parseFloat(inertBedHeight).toFixed(2),["vesselCylindricalHeight"]: Number.parseFloat(vesselCylindricalHeight).toFixed(2),["vesselWallThickness"]: Number.parseFloat(vesselWallThickness).toFixed(2)};
-      });
+      let resinVolumeAsDelivered = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.resinVolumeAsDelivered,
+        "m³",
+        unit.selectedUnits[12]
+      );
+      let inertResinVolume = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.inertResinVolume,
+        "m³",
+        unit.selectedUnits[12]
+      );
+      let vesselDiameter = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.vesselDiameter,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let resinBedHeightAsDelivered = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.resinBedHeightAsDelivered,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let resinBedStandardHeight = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.resinBedStandardHeight,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let resinBedHeightAsRegenerated = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.resinBedHeightAsRegenerated,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let resinBedHeightAsExhausted = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.resinBedHeightAsExhausted,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let inertBedHeight = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.inertBedHeight,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let vesselCylindricalHeight = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.vesselCylindricalHeight,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      let vesselWallThickness = GlobalUnitConversion(
+        GlobalUnitConversionStore,
+        item.vesselWallThickness,
+        "mm",
+        unit.selectedUnits[8]
+      );
+      return {
+        ...item,
+        ["resinVolumeAsDelivered"]: Number.parseFloat(
+          resinVolumeAsDelivered
+        ).toFixed(2),
+        ["inertResinVolume"]: Number.parseFloat(inertResinVolume).toFixed(2),
+        ["vesselDiameter"]: Number.parseFloat(vesselDiameter).toFixed(2),
+        ["resinBedHeightAsDelivered"]: Number.parseFloat(
+          resinBedHeightAsDelivered
+        ).toFixed(2),
+        ["resinBedStandardHeight"]: Number.parseFloat(
+          resinBedStandardHeight
+        ).toFixed(2),
+        ["resinBedHeightAsRegenerated"]: Number.parseFloat(
+          resinBedHeightAsRegenerated
+        ).toFixed(2),
+        ["resinBedHeightAsExhausted"]: Number.parseFloat(
+          resinBedHeightAsExhausted
+        ).toFixed(2),
+        ["inertBedHeight"]: Number.parseFloat(inertBedHeight).toFixed(2),
+        ["vesselCylindricalHeight"]: Number.parseFloat(
+          vesselCylindricalHeight
+        ).toFixed(2),
+        ["vesselWallThickness"]:
+          Number.parseFloat(vesselWallThickness).toFixed(2),
+      };
+    });
     const MethodName = { Method: "ix/api/v1/AutoSaveIXData" };
     const IXData_Method_Body = {
       ...MethodName,
       ...ixStore,
-      ["treatmentObjID"] :caseTreatmentId,
-      ["caseTreatmentID"]:caseTreatmentId,
-     [ "treatmentName"]: "IXD",
+      ["treatmentObjID"]: caseTreatmentId,
+      ["caseTreatmentID"]: caseTreatmentId,
+      ["treatmentName"]: "IXD",
       ["listFinalParamAdj"]: dummyListFinal,
     };
     let PostResponseValues = await IXData_PostData(IXData_Method_Body);
-    console.log("responseMessage", PostResponseValues.data.responseMessage);
     if (PostResponseValues.data.responseMessage == "Success") {
       // toast.success("IXdata ,Record Updated successfully !", {
       //   position: toast.POSITION.TOP_RIGHT
@@ -687,10 +940,11 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
   };
 
   /* Clear user loggedin informations from store, and redirect to salesforce logout */
-  const handleLogout = async () => {
+  const handleLogout = () => {
     // clearUserData();
-    window.location.href =
-      process.env.REACT_APP_TOKEN_SFDCURL + "auth/idp/oidc/logout";
+    sessionStorage.clear();
+    // window.location.href =
+    //   process.env.REACT_APP_TOKEN_SFDCURL + "auth/idp/oidc/logout";
     //  callLogoutGETCall(`${process.env.REACT_APP_TOKEN_SFDCURL}auth/idp/oidc/logout`);
   };
 
@@ -712,7 +966,7 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
   const handleOpenIXSideMenu = () => {
     dispatch(updateIXMenuIconHeader(!headerIXMenuIconStatus));
   };
-  console.log("check header menu icon clicked", headerIXMenuIconStatus);
+  // console.log("check header menu icon clicked", headerIXMenuIconStatus);
   const tabletView = useSelector((state) => state.UFStore.tabletMenuIcon);
   const ixTabletView = useSelector((state) => state.IXStore.ixTabletView);
   return (
@@ -748,7 +1002,6 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
                 <a href="https://www.dupont.com/" target="__blank">
                   <img src={DuPont_logo_Red} alt="logo" />
                 </a>
-               
               </div>
               <div>
                 <CustomHeading
@@ -952,7 +1205,7 @@ const Header = ({ showSideMenu, setShowMenuIcon }) => {
                             <a
                               href={`${process.env.REACT_APP_TOKEN_SFDCURL}auth/idp/oidc/logout`}
                               className={isLoggedIn ? "" : "not-loggedin"}
-                              // onClick={handleLogout}
+                              onClick={handleLogout}
                             >
                               Sign Out
                             </a>

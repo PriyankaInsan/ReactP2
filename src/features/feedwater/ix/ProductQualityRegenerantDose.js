@@ -161,20 +161,58 @@ const ProductQualityRegenerantDose = () => {
   useEffect(() => {
     if (ixStoreCation?.overAllComputation === 1) {
       if (calcChemDose.length > 0 && calcOverrun.length > 0) {
-        dispatch(
+        var calcChemDose0 = 
+        GlobalUnitConversion(
+         GlobalUnitConversionStore,
+         Math.round(calcChemDose[0]),
+         "g/L",
+         unit.selectedUnits[14] );
+
+         var calcChemDose1 = 
+         GlobalUnitConversion(
+          GlobalUnitConversionStore,
+          Math.round(calcChemDose[1]),
+          "g/L",
+          unit.selectedUnits[14] );
+          
+          var calcChemDose3 = 
+          GlobalUnitConversion(
+           GlobalUnitConversionStore,
+           Math.round(calcChemDose[3]),
+           "g/L",
+           unit.selectedUnits[14] );
+          
+        if( calcChemDose[0]=="" && calcChemDose[2]=="")
+        {  dispatch(
           updateProductQualityRegenerantDose([
             {
               ...ixStoreCation,
-              ["regenerantDoseVal4"]: calcChemDose[0],
+              ["regenerantDoseVal4"]: calcChemDose1,
               ["regenerantDoseVal2"]: calcOverrun[0],
             },
             {
               ...ixStoreAnion,
-              ["regenerantDoseVal4"]: calcChemDose[1],
+              ["regenerantDoseVal4"]:calcChemDose3,
+              ["regenerantDoseVal2"]: calcOverrun[1],
+            },
+          ])
+        );}
+        else{
+        dispatch(
+          updateProductQualityRegenerantDose([
+            {
+              ...ixStoreCation,
+              ["regenerantDoseVal4"]:calcChemDose0,
+              ["regenerantDoseVal2"]: calcOverrun[0],
+            },
+            {
+              ...ixStoreAnion,
+              ["regenerantDoseVal4"]: calcChemDose1,
               ["regenerantDoseVal2"]: calcOverrun[1],
             },
           ])
         );
+        }
       }
     }
   }, [calcChemDose, calcOverrun]);
@@ -183,7 +221,6 @@ const ProductQualityRegenerantDose = () => {
 
   useEffect(() => {
     try {
-      console.log("pawan chouhan test");
       let apiUrl = `${"ix/api/v1/ProductQualityAndRegenerantDose"}?userID=${
         Req_AndRegenerantDose.userID
       }&projectID=${Req_AndRegenerantDose.projectID}&validdesignID=${

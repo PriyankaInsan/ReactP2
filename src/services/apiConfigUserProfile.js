@@ -30,7 +30,7 @@ export const postApiUser = createApi({
     isNewUser: builder.query({
       query: (data) => {  
         return {
-          url: `/userprofile/api/v1/FirstLogin?emailID=${data.email}`,
+          url: `/userprofile/api/v1/FirstLogin?emailID=${data.email}&loginFlag=${sessionStorage.getItem("userLogedIn")?sessionStorage.getItem("userLogedIn"):true}`,
           method: "GET"
         };
       },

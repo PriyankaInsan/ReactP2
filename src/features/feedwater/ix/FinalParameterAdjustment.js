@@ -838,6 +838,12 @@ const FinalParameterAdjustment = () => {
               unit.selectedUnits[8],
               "m"
             );
+            let freeBoard = GlobalUnitConversion(
+              GlobalUnitConversionStore,
+              finalList[index].freeBoard,
+              unit.selectedUnits[8],
+              "m"
+            );
             let inertBedHeight = GlobalUnitConversion(
               GlobalUnitConversionStore,
               finalList[index].inertBedHeight,
@@ -871,6 +877,7 @@ const FinalParameterAdjustment = () => {
               ["resinBedHeightAsExhausted"]: Number.parseFloat(
                 resinBedHeightAsExhausted
               ).toFixed(2),
+              ["freeBoard"]:Number.parseFloat(freeBoard).toFixed(2),
               ["inertBedHeight"]: Number.parseFloat(inertBedHeight).toFixed(2),
               ["vesselCylindricalHeight"]: Number.parseFloat(
                 vesselCylindricalHeight

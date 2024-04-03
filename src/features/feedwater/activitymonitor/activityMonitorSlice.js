@@ -37,6 +37,12 @@ export const activityMonitorSlice = createSlice({
       state.loader = true;
       state.error = false;
     },
+    resetReport:(state,action)=>{
+      console.log("PK state.reportData",state.reportData.length);
+      state.loader = false;
+      state.error = false;
+      state.reportData = "";
+    }
   },
 });
 export const {
@@ -45,5 +51,6 @@ export const {
   setErrorReport,
   setErrorMessage,
   setReportLoader,
+  resetReport,
 } = activityMonitorSlice.actions;
 export default activityMonitorSlice.reducer;

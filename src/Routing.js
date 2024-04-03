@@ -43,6 +43,7 @@ function Routing() {
       setLoggedIn(false);
       dispatch(clearAuthData());
       localStorage.clear();
+      sessionStorage.clear();
       //window.location.href = process.env.REACT_APP_LOGOUT_ENDPOINT;
       window.location.href =
         process.env.REACT_APP_TOKEN_SFDCURL + "auth/idp/oidc/logout";
