@@ -1,0 +1,477 @@
+<svg width="2000" height="268" viewBox="0 0 4266 1763" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Boiler image redrawing" clip-path="url(#clip0_187787_89768)">
+<rect width="4266" height="1763" fill="white"/>
+<g id="Group 933">
+<g id="Group 911">
+<path id="Union" fill-rule="evenodd" clip-rule="evenodd" d="M1695.87 447.391C1681.37 430.963 1618.21 418.598 1542.5 418.598C1466.79 418.598 1403.63 430.963 1389.13 447.391H1386V454.588V683.01V683.49H1386.01C1387.13 703.146 1456.76 719.001 1542.5 719.001C1628.24 719.001 1697.87 703.146 1698.99 683.49H1699V683.01V454.588V447.391H1695.87Z" fill="url(#paint0_linear_187787_89768)"/>
+<ellipse id="Ellipse 284" cx="1542.5" cy="444.991" rx="156.5" ry="35.9907" fill="#BFB998"/>
+</g>
+<rect id="Rectangle 963" x="97" y="91" width="1000" height="417" fill="#D9D9D9"/>
+<g id="Module: IntegraFlux SFP-2860XP Total UF Trains: 1 UF Modules: 1 x 1 = 1 Operating Flux: 2056 LMH UF System Recovery: 99.9%">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="357.2" y="166.182" id="wavepro_Module"></tspan>
+<tspan x="577.134" y="244.182" id="wavepro_total-uf-trains"> </tspan>
+<tspan x="485.753" y="322.182" id="wavepro_uf-modules"> </tspan>
+<tspan x="572.606" y="400.182"  id="wavepro_operating-flux">  </tspan>
+<tspan x="748.935" y="478.182" id="wavepro_uf-system-recovery">  </tspan>
+</text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="116" y="166.182">Module:</tspan>
+<tspan x="116" y="244.182">Total UF Trains:</tspan>
+<tspan x="116" y="322.182">UF Modules:</tspan>
+<tspan x="116" y="400.182">Operating Flux:</tspan>
+<tspan x="116" y="478.182">UF System Recovery:</tspan></text>
+</g>
+<g id="Group 915">
+<text id="FeedWater" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="107" y="609.682">Feed Water</tspan>
+</text>
+<text id="AverageFeedFlow" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="107" y="682.182">Average Feed Flow: <tspan id="wavepro_feedWater-average-feed-flow"></tspan></tspan>
+<tspan x="107" y="756.182">Type: <tspan id="wavepro_feedWater-type"> </tspan></tspan>
+<tspan x="107" y="830.182">TSS: <tspan id="wavepro_feedWater-tss"> </tspan></tspan>
+<tspan x="107" y="904.182">TOC: <tspan id="wavepro_feedWater-toc"> </tspan></tspan>
+<tspan x="107" y="978.182">Turbidity: <tspan id="wavepro_feedWater-turbidity"> </tspan></tspan>
+</text>
+<text id="3" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="736" y="646.318" id="unit-average-feed-flow">3</tspan></text>
+</g>
+<text id="3_2" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="450" y="1128.32">3</tspan></text>
+<text id="3_3" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="2472" y="1275.32">3</tspan></text>
+<text id="3_4" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="2882" y="1275.32">3</tspan></text>
+<text id="3_5" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="1793" y="1094.32">3</tspan></text>
+<text id="3_6" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="3946" y="1487.32">3</tspan></text>
+<text id="3_7" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="1303" y="858.318">3</tspan></text>
+<text id="3_8" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="3131" y="221.318">3</tspan></text>
+<text id="3_9" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="3987" y="273.318">3</tspan></text>
+<text id="Feed Pump" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="106" y="1101.68">Feed Pump</tspan>
+</text>
+<text id="Strainer" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="1030" y="1148.68">Strainer</tspan>
+</text>
+<text id="Feed Valve" fill="#939393" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="1237" y="1668.68">Feed Valve</tspan></text>
+<text id="Drain Valve" fill="#939393" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="2431" y="1668.68">Drain Valve</tspan></text>
+<text id="Air Valve" fill="#939393" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="1625" y="1482.68">Air Valve</tspan></text>
+<text id="Air Scour" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="1617" y="1051.68">Air Scour</tspan></text>
+<text id="CIP Pump" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="1175" y="802.682" id="wavepro_cip-pump">CIP Pump</tspan>
+</text>
+<text id="CIP Tank" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="1484.77" y="546.682">CIP</tspan>
+<tspan x="1463.47" y="617.682">Tank</tspan>
+</text>
+<text id="Waste" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="3800" y="1431.68">Waste</tspan></text>
+<text id="Net Filtrate" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="3799" y="228.682">Net Filtrate</tspan></text>
+<text id="Conc. Valve" fill="#939393" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="3854" y="504.682">Conc.</tspan>
+<tspan x="3854" y="573.682">Valve</tspan></text>
+<text id="Gross Filtrate" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="2940" y="178.682">Gross Filtrate</tspan></text>
+<text id="Backwash Valve" fill="#303030" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="2268" y="536.682">Backwash Valve</tspan></text>
+<text id="Filtrate Valve" fill="#939393" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="2433" y="269.682">Filtrate Valve</tspan></text>
+<text id="Backwash Pump" fill="#202020" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="2213" y="1217.68">Backwash Pump</tspan></text>
+<text id="CEB" fill="#6B6B6B" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="50" font-weight="bold" letter-spacing="0em">
+<tspan x="2365" y="742.682" id="wavepro_ceb-chemical-field1"></tspan></text>
+<text id="CEB 250 mg/L NaCCI 9.3 L/h 12%" fill="#6B6B6B" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="50" font-weight="bold" letter-spacing="0em">
+<tspan x="2365" y="942.68" id="wavepro_ceb-chemical-field2"></tspan></text>
+<text id="1.5m /h" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1175" y="880.682" id="wavepro_cip-pump-field1"></tspan></text>
+<text id="12 Nm /h" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1618" y="1121.68" id="wavepro_air-scour-field1"></tspan></text>
+<text id="@ 0.75 bar" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1619" y="1205.68" id="wavepro_air-scour-field2"></tspan></text>
+<text id="@ 2.5 bar" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="2219" y="1372.68" id="wavepro_Backwash-pump-field2"></tspan>
+</text>
+<text id="BW 5.1 m /h / CEB 5.1 m /h" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="2212" y="1293.68" id="wavepro_Backwash-pump-field1"></tspan></text>
+<text id="Wastee" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="3800" y="1508.68" id="wavepro_waste"></tspan></text>
+<text id="99.5 m /h" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="2938" y="241.682" id="wavepro_gross-filtrate"></tspan></text>
+<text id="99.5 m /h_2" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="3794" y="293.682" id="wavepro_net-filtrate"></tspan></text>
+<text id="150 &#194;&#181;m" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1030" y="1227.68" id="wavepro_strainer-specification"></tspan>
+</text>
+<text id="99.5 % Recovery" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1030" y="1298.68" id="wavepro_strainer-recovery"></tspan>
+</text>
+<text id="@ 2.5 bar_2" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1175" y="958.682" id="wavepro_cip-pump-field2"></tspan></text>
+<text id="Max 105.4m /h @ 3.3 bar" fill="#454545" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="106" y="1173.18" id="wavepro_feed-pump-field1"></tspan>
+<tspan x="106" y="1247.18" id="wavepro_feed-pump-field2"></tspan>
+</text>
+<path id="Vector 35" d="M1776 107L1716 72.359V141.641L1776 107ZM1533 107V101C1529.69 101 1527 103.686 1527 107H1533ZM1533 409L1567.64 349H1498.36L1533 409ZM1722 101H1533V113H1722V101ZM1527 107V355H1539V107H1527Z" fill="#948A54"/>
+<path id="Vector 36" d="M1774 221L1714 186.359V255.641L1774 221ZM1611 221V215C1607.69 215 1605 217.686 1605 221H1611ZM1611 409L1645.64 349H1576.36L1611 409ZM1720 215H1611V227H1720V215ZM1605 221V355H1617V221H1605Z" fill="#948A54"/>
+<path id="Vector 37" d="M1775 221L1840 258.528L1840 183.472L1775 221ZM1978 214.5L1833.5 214.5L1833.5 227.5L1978 227.5L1978 214.5Z" fill="#948A54"/>
+<path id="Vector 51" d="M2073 256L2326 256L2326 375" stroke="#948A54" stroke-width="13" stroke-linejoin="round"/>
+<path id="Vector 38" d="M1775 107L1840 144.528V69.4722L1775 107ZM2030.5 100.5H1833.5V113.5H2030.5V100.5Z" fill="#948A54"/>
+<path id="Vector 39" d="M1547.5 1563.5L1582.14 1503.5H1512.86L1547.5 1563.5ZM1547.5 1141L1512.86 1201H1582.14L1547.5 1141ZM1553.5 1509.5V1195H1541.5V1509.5H1553.5Z" fill="#948A54"/>
+<path id="Vector 40" d="M1545 1134L1579.64 1074L1510.36 1074L1545 1134ZM1545 836V830C1543.41 830 1541.88 830.632 1540.76 831.757C1539.63 832.883 1539 834.409 1539 836L1545 836ZM1875 836V842C1878.31 842 1881 839.314 1881 836H1875ZM1875 606.5H1881C1881 603.186 1878.31 600.5 1875 600.5V606.5ZM1551 1080L1551 836L1539 836L1539 1080L1551 1080ZM1545 842H1875V830H1545V842ZM1881 836V606.5H1869V836H1881ZM1875 600.5H1697.5V612.5H1875V600.5Z" fill="#948A54"/>
+<path id="Vector 41" d="M4055.5 1572L3995.5 1537.36V1606.64L4055.5 1572ZM2013 1578H4001.5V1566H2013V1578Z" fill="#4F6228"/>
+<path id="Vector 34" d="M980.66 1026H986.66C986.66 1022.69 983.974 1020 980.66 1020V1026ZM980.66 1572H974.66C974.66 1575.31 977.346 1578 980.66 1578V1572ZM2030 1572V1578C2033.31 1578 2036 1575.31 2036 1572H2030ZM2030 1456L1995.36 1516H2064.64L2030 1456ZM319 1032H980.66V1020H319V1032ZM974.66 1026V1572H986.66V1026H974.66ZM980.66 1578H2030V1566H980.66V1578ZM2036 1572V1510H2024V1572H2036Z" fill="#10253F"/>
+<path id="Rectangle 958" d="M1129 1329H1249V1544C1249 1577.14 1222.14 1604 1189 1604C1155.86 1604 1129 1577.14 1129 1544V1329Z" fill="url(#paint1_linear_187787_89768)"/>
+<path id="Vector 42" d="M2031 105V99C2027.69 99 2025 101.686 2025 105H2031ZM3767 105H3773C3773 101.686 3770.31 99 3767 99V105ZM3767 1570L3801.64 1510H3732.36L3767 1570ZM2037 277V105H2025V277H2037ZM2031 111H3767V99H2031V111ZM3761 105V1516H3773V105H3761Z" fill="#4F6228"/>
+<path id="Vector 43" d="M3468 378H3474C3474 374.686 3471.31 372 3468 372V378ZM3468 965L3502.64 905H3433.36L3468 965ZM2101 384H3468V372H2101V384ZM3462 378V911H3474V378H3462Z" fill="#558ED5"/>
+<path id="Vector 44" d="M3721 378H3566V973" stroke="#558ED5" stroke-width="12" stroke-linejoin="round"/>
+<path id="Vector 46" d="M2182 1432H2176C2176 1435.31 2178.69 1438 2182 1438V1432ZM2182 382.5L2147.36 442.5H2216.64L2182 382.5ZM3394 1426H2182V1438H3394V1426ZM2188 1432V436.5H2176V1432H2188Z" fill="#4F6228"/>
+<path id="Union_2" fill-rule="evenodd" clip-rule="evenodd" d="M3130 1560C3085.82 1560 3050 1524.18 3050 1480C3050 1471.64 3051.28 1463.58 3053.66 1456H3029V1400H3130H3132V1400.02C3175.26 1401.09 3210 1436.49 3210 1480C3210 1524.18 3174.18 1560 3130 1560Z" fill="url(#paint2_linear_187787_89768)"/>
+<g id="Group 920">
+<g id="Group 917">
+<path id="Polygon 18" d="M1364 1574.5L1417.25 1543.76L1417.25 1605.24L1364 1574.5Z" fill="#404040"/>
+<path id="Polygon 19" d="M1387 1574.5L1333.75 1605.24L1333.75 1543.76L1387 1574.5Z" fill="#404040"/>
+</g>
+<g id="Group 918">
+<path id="Rectangle 968" d="M1352 1518C1352 1509.72 1358.72 1503 1367 1503H1385C1393.28 1503 1400 1509.72 1400 1518V1542H1352V1518Z" fill="#404040"/>
+<rect id="Rectangle 970" x="1365" y="1540" width="23" height="27" fill="#404040"/>
+</g>
+</g>
+<g id="Group 922">
+<g id="Group 917_2">
+<path id="Polygon 18_2" d="M2561.58 1575.2L2612.14 1546.01L2612.14 1604.39L2561.58 1575.2Z" fill="#404040"/>
+<path id="Polygon 19_2" d="M2583.42 1575.2L2532.86 1604.39L2532.86 1546L2583.42 1575.2Z" fill="#404040"/>
+</g>
+<g id="Group 918_2">
+<path id="Rectangle 968_2" d="M2550.19 1521C2550.19 1512.72 2556.9 1506 2565.19 1506H2580.76C2589.05 1506 2595.76 1512.72 2595.76 1521V1543.03H2550.19V1521Z" fill="#404040"/>
+<rect id="Rectangle 970_2" x="2562.53" y="1542.44" width="21.8403" height="25.6387" fill="#404040"/>
+</g>
+</g>
+<g id="Group 923">
+<g id="Group 917_3">
+<path id="Polygon 18_3" d="M2561.58 377.2L2612.14 348.006L2612.14 406.394L2561.58 377.2Z" fill="#404040"/>
+<path id="Polygon 19_3" d="M2583.42 377.198L2532.86 406.392L2532.86 348.005L2583.42 377.198Z" fill="#404040"/>
+</g>
+<g id="Group 918_3">
+<path id="Rectangle 968_3" d="M2550.19 325C2550.19 316.716 2556.9 310 2565.19 310H2580.76C2589.05 310 2595.76 316.716 2595.76 325V347.034H2550.19V325Z" fill="#404040"/>
+<rect id="Rectangle 970_3" x="2562.53" y="344.438" width="21.8403" height="25.6387" fill="#404040"/>
+</g>
+</g>
+<g id="Group 930">
+<g id="Group 917_4">
+<path id="Polygon 18_4" d="M2184.49 510.645L2216.18 565.526H2152.81L2184.49 510.645Z" fill="#404040"/>
+<path id="Polygon 19_4" d="M2184.49 534.355L2152.81 479.474L2216.18 479.474L2184.49 534.355Z" fill="#404040"/>
+</g>
+<g id="Group 918_4">
+<path id="Rectangle 968_4" d="M2245 498.277C2253.28 498.277 2260 504.993 2260 513.277L2260 532.748C2260 541.032 2253.28 547.748 2245 547.748L2219.81 547.748L2219.81 498.277L2245 498.277Z" fill="#404040"/>
+<rect id="Rectangle 970_4" x="2220.52" y="512.188" width="22.7925" height="32.5608" transform="rotate(90 2220.52 512.188)" fill="#404040"/>
+</g>
+</g>
+<g id="Group 924">
+<g id="Group 917_5">
+<path id="Polygon 18_5" d="M3764.71 505.578L3793.9 556.143H3735.52L3764.71 505.578Z" fill="#404040"/>
+<path id="Polygon 19_5" d="M3764.71 527.422L3735.52 476.857L3793.9 476.857L3764.71 527.422Z" fill="#404040"/>
+</g>
+<g id="Group 918_5">
+<path id="Rectangle 968_5" d="M3817.91 494.184C3826.19 494.184 3832.91 500.899 3832.91 509.184L3832.91 524.763C3832.91 533.048 3826.19 539.763 3817.91 539.763L3791.28 539.763L3791.28 494.184L3817.91 494.184Z" fill="#404040"/>
+<rect id="Rectangle 970_5" x="3793.82" y="506.527" width="21.8403" height="28.8187" transform="rotate(90 3793.82 506.527)" fill="#404040"/>
+</g>
+</g>
+<g id="Group 929">
+<rect id="Rectangle 965" x="1990" y="285" width="81" height="30" rx="6" fill="#27231E"/>
+<rect id="Rectangle 966" x="2010" y="305" width="40" height="21" fill="#27231E"/>
+<g id="Group 928">
+<g id="Group 927">
+<rect id="Rectangle 974" x="1958" y="480" width="143" height="797" rx="4" fill="url(#paint3_linear_187787_89768)"/>
+<g id="Group 925">
+<path id="Union_3" fill-rule="evenodd" clip-rule="evenodd" d="M1958 509C1958 509 1958 509 1958 509V431H2101V441C2101 441 2101 441 2101 441V519L1958 519L1958 509Z" fill="url(#paint4_linear_187787_89768)"/>
+<rect id="Rectangle 967" x="1958" y="406" width="143" height="32" fill="url(#paint5_linear_187787_89768)"/>
+<rect id="Rectangle 969" x="1970" y="422" width="4" height="4" fill="#3C3734"/>
+<rect id="Rectangle 970_6" x="1996" y="422" width="4" height="4" fill="#3C3734"/>
+<rect id="Rectangle 971" x="2025" y="422" width="4" height="4" fill="#3C3734"/>
+<rect id="Rectangle 972" x="2055" y="422" width="4" height="4" fill="#3C3734"/>
+<rect id="Rectangle 973" x="2085" y="422" width="4" height="4" fill="#3C3734"/>
+<rect id="Rectangle 964" x="1958" y="326" width="143" height="83" rx="4" fill="url(#paint6_linear_187787_89768)"/>
+</g>
+<g id="Group 926">
+<path id="Vector 48" d="M2101 1246C2055.05 1280.28 1976.58 1268.85 1958 1246V1324H2101V1246Z" fill="url(#paint7_linear_187787_89768)"/>
+<rect id="Rectangle 967_2" width="143" height="32" transform="matrix(1 0 0 -1 1958 1349)" fill="url(#paint8_linear_187787_89768)"/>
+<rect id="Rectangle 969_2" width="4" height="4" transform="matrix(1 0 0 -1 1970 1333)" fill="#3C3734"/>
+<rect id="Rectangle 970_7" width="4" height="4" transform="matrix(1 0 0 -1 1996 1333)" fill="#3C3734"/>
+<rect id="Rectangle 971_2" width="4" height="4" transform="matrix(1 0 0 -1 2025 1333)" fill="#3C3734"/>
+<rect id="Rectangle 972_2" width="4" height="4" transform="matrix(1 0 0 -1 2055 1333)" fill="#3C3734"/>
+<rect id="Rectangle 973_2" width="4" height="4" transform="matrix(1 0 0 -1 2085 1333)" fill="#3C3734"/>
+<rect id="Rectangle 964_2" width="143" height="83" rx="4" transform="matrix(1 0 0 -1 1958 1429)" fill="url(#paint9_linear_187787_89768)"/>
+</g>
+</g>
+</g>
+<g id="Group 793">
+<text id="Water Solutions" fill="black" xml:space="preserve" style="white-space: pre" font-family="Diodrum" font-size="8" font-weight="600" letter-spacing="0px">
+<tspan x="2000.11" y="610">Water Solutions</tspan></text>
+<path id="DuPont Logo SVG" fill-rule="evenodd" clip-rule="evenodd" d="M2035.3 576.008C2033.18 575.898 2031.91 576.905 2031.91 579.21V590.662C2031.91 593.096 2033.06 594.098 2035.3 593.993C2037.49 593.89 2038.63 592.994 2038.63 590.406V579.474C2038.63 577.007 2037.6 576.128 2035.3 576.008V576.008ZM2027.07 576.105C2026.67 576.105 2025.22 576.159 2023.89 576.244V593.752C2024.34 593.777 2025.53 593.844 2026.17 593.862V587.916L2027.07 587.915C2029.47 587.907 2030.46 586.752 2030.46 584.528V579.369C2030.46 577.193 2029.34 576.106 2027.07 576.106V576.105V576.105ZM2019.81 590.058C2019.81 590.75 2019.59 591.188 2018.79 591.083C2018 590.98 2017.79 590.622 2017.79 589.802V576.795C2017.27 576.856 2016.1 577.03 2015.6 577.107V590.263C2015.6 592.364 2016.55 593.181 2018.79 593.457C2020.84 593.711 2022.1 592.594 2022.1 590.263V576.364C2021.67 576.39 2020.27 576.518 2019.81 576.57V590.058L2019.81 590.058ZM2044.98 585.76L2042.44 576.858C2041.75 576.761 2040.92 576.661 2040.27 576.597V593.398C2040.73 593.352 2041.88 593.211 2042.48 593.129L2042.3 583.229L2044.98 592.742C2045.55 592.645 2046.38 592.489 2046.93 592.376V577.614C2046.36 577.494 2045.32 577.304 2044.82 577.223L2044.98 585.76L2044.98 585.76ZM2011.36 578.16C2010.63 578.16 2009.59 578.391 2007.69 579.021V590.972C2009.36 591.516 2010.63 591.833 2011.36 591.833C2013.04 591.833 2013.98 590.732 2013.98 588.964V581.029C2013.98 579.262 2013.04 578.16 2011.36 578.16V578.16ZM2048.06 580.196C2048.63 580.305 2049.19 580.426 2049.73 580.555V591.726C2050.23 591.6 2051.16 591.339 2051.78 591.142V581.082C2052.37 581.248 2052.93 581.414 2053.45 581.572V579.418C2051.83 578.81 2050.09 578.316 2048.06 577.861V580.197L2048.06 580.196ZM2036.32 590.458C2036.32 591.149 2036.11 591.508 2035.3 591.533C2034.46 591.559 2034.24 591.175 2034.24 590.458V579.543C2034.24 578.826 2034.46 578.428 2035.3 578.454C2036.11 578.48 2036.32 578.851 2036.32 579.543V590.458ZM2011.91 588.657C2011.91 589.349 2011.52 589.579 2011.06 589.579C2010.7 589.579 2010.14 589.439 2009.69 589.305V580.683C2010.14 580.555 2010.7 580.414 2011.06 580.414C2011.52 580.414 2011.91 580.644 2011.91 581.336V588.657V588.657ZM2055.91 580.478C2058.51 581.797 2060 583.334 2060 584.971C2060 586.626 2058.51 588.17 2055.91 589.5V580.478ZM2000 584.971C2000 586.623 2001.49 588.171 2004.09 589.497V580.481C2001.49 581.797 2000 583.334 2000 584.971V584.971ZM2028.15 584.344C2028.15 585.097 2027.91 585.479 2026.98 585.482L2026.17 585.484V578.575C2026.53 578.555 2026.72 578.55 2026.94 578.55C2027.94 578.55 2028.15 578.96 2028.15 579.728V584.344Z" fill="#E4001C"/>
+</g>
+</g>
+<path id="Vector 49" d="M1663 1400H1657.5V1405.5H1663V1400ZM1940 1400L1885 1368.25V1431.75L1940 1400ZM1657.5 1245V1254.69H1668.5V1245H1657.5ZM1657.5 1274.06V1293.44H1668.5V1274.06H1657.5ZM1657.5 1312.81V1332.19H1668.5V1312.81H1657.5ZM1657.5 1351.56V1370.94H1668.5V1351.56H1657.5ZM1657.5 1390.31V1400H1668.5V1390.31H1657.5ZM1663 1405.5H1671.66V1394.5H1663V1405.5ZM1688.97 1405.5H1706.28V1394.5H1688.97V1405.5ZM1723.59 1405.5H1740.91V1394.5H1723.59V1405.5ZM1758.22 1405.5H1775.53V1394.5H1758.22V1405.5ZM1792.84 1405.5H1810.16V1394.5H1792.84V1405.5ZM1827.47 1405.5H1844.78V1394.5H1827.47V1405.5ZM1862.09 1405.5H1879.41V1394.5H1862.09V1405.5ZM1896.72 1405.5H1914.03V1394.5H1896.72V1405.5Z" fill="#31859C"/>
+<g id="Group 921">
+<g id="Group 917_6">
+<path id="Polygon 18_6" d="M1753.58 1393.75L1804.14 1364.55L1804.14 1422.94L1753.58 1393.75Z" fill="#404040"/>
+<path id="Polygon 19_6" d="M1775.42 1393.75L1724.86 1422.94L1724.86 1364.55L1775.42 1393.75Z" fill="#404040"/>
+</g>
+<g id="Group 918_6">
+<path id="Rectangle 968_6" d="M1742.19 1339.55C1742.19 1331.26 1748.9 1324.55 1757.19 1324.55H1772.76C1781.05 1324.55 1787.76 1331.26 1787.76 1339.55V1361.58H1742.19V1339.55Z" fill="#404040"/>
+<rect id="Rectangle 970_8" x="1754.53" y="1360.98" width="21.8403" height="25.6387" fill="#404040"/>
+</g>
+</g>
+<path id="Vector 50" d="M2202.5 726L2252.5 754.868V697.132L2202.5 726ZM2202.5 1023L2252.5 1051.87V994.132L2202.5 1023ZM2349.5 721H2247.5V731H2349.5V721ZM2349.5 1018H2247.5V1028H2349.5V1018Z" fill="#E61611"/>
+<path id="Vector 45" d="M4057 378L3997 343.359V412.641L4057 378ZM3816 384H4003V372H3816V384Z" fill="#558ED5"/>
+<g id="Group 914">
+<path id="Union_4" fill-rule="evenodd" clip-rule="evenodd" d="M3697 1010H3384V1472.62V1473H3384.01C3384.9 1492.7 3454.62 1508.61 3540.5 1508.61C3626.38 1508.61 3696.1 1492.7 3696.99 1473H3697V1472.62V1010Z" fill="url(#paint10_linear_187787_89768)"/>
+<ellipse id="Ellipse 284_2" cx="3540.5" cy="1006.99" rx="156.5" ry="35.9907" fill="#BBD2EE"/>
+</g>
+<text id="3_10" fill="#1F2832" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="38" letter-spacing="0em">
+<tspan x="3596" y="1346.32">3</tspan></text>
+<text id="Filtrate Tank" fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" font-weight="bold" letter-spacing="0em">
+<tspan x="3435.08" y="1212.68">Filtrate</tspan><tspan x="3468.47" y="1287.68">Tank</tspan></text>
+<path id="Polygon 20" d="M1875.5 809L1843.02 752.75L1907.98 752.75L1875.5 809Z" fill="#948A54"/>
+<text id="25 m" fill="#1F2832" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="3452" y="1363.68" id="wavepro_filtrate-tank"></tspan></text>
+<text id="70 L" fill="#1F2832" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="61" letter-spacing="0em">
+<tspan x="1483" y="688.682" id="wavepro_cip-tank"></tspan>
+</text>
+<path id="Union_5" fill-rule="evenodd" clip-rule="evenodd" d="M842 1149C886.183 1149 922.001 1113.18 922.001 1069C922.001 1063.52 921.45 1058.17 920.401 1053H943V989H842H840V989.025C796.741 990.086 762 1025.49 762 1069C762 1113.18 797.817 1149 842 1149Z" fill="url(#paint11_linear_187787_89768)"/>
+<path id="Union_6" fill-rule="evenodd" clip-rule="evenodd" d="M1749 954.001C1704.82 954.001 1669 918.183 1669 874C1669 868.521 1669.55 863.17 1670.6 858H1648V794H1749H1751V794.025C1794.26 795.086 1829 830.486 1829 874C1829 918.183 1793.18 954.001 1749 954.001Z" fill="url(#paint12_linear_187787_89768)"/>
+<g id="Group 931">
+<g id="Rectangle 975" filter="url(#filter0_f_187787_89768)">
+<rect x="1971" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 976" filter="url(#filter1_f_187787_89768)">
+<rect x="1984" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 977" filter="url(#filter2_f_187787_89768)">
+<rect x="1997" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 978" filter="url(#filter3_f_187787_89768)">
+<rect x="2010" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 979" filter="url(#filter4_f_187787_89768)">
+<rect x="2023" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 980" filter="url(#filter5_f_187787_89768)">
+<rect x="2036" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 981" filter="url(#filter6_f_187787_89768)">
+<rect x="2049" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 982" filter="url(#filter7_f_187787_89768)">
+<rect x="2062" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 983" filter="url(#filter8_f_187787_89768)">
+<rect x="2075" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 984" filter="url(#filter9_f_187787_89768)">
+<rect x="2087" y="326" width="2" height="83" fill="#FBFAF8"/>
+</g>
+</g>
+<g id="Group 932">
+<g id="Rectangle 975_2" filter="url(#filter10_f_187787_89768)">
+<rect x="1971" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 976_2" filter="url(#filter11_f_187787_89768)">
+<rect x="1984" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 977_2" filter="url(#filter12_f_187787_89768)">
+<rect x="1997" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 978_2" filter="url(#filter13_f_187787_89768)">
+<rect x="2010" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 979_2" filter="url(#filter14_f_187787_89768)">
+<rect x="2023" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 980_2" filter="url(#filter15_f_187787_89768)">
+<rect x="2036" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 981_2" filter="url(#filter16_f_187787_89768)">
+<rect x="2049" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 982_2" filter="url(#filter17_f_187787_89768)">
+<rect x="2062" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 983_2" filter="url(#filter18_f_187787_89768)">
+<rect x="2075" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+<g id="Rectangle 984_2" filter="url(#filter19_f_187787_89768)">
+<rect x="2087" y="1347" width="2" height="83" fill="#FBFAF8"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_187787_89768" x="1966" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter1_f_187787_89768" x="1979" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter2_f_187787_89768" x="1992" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter3_f_187787_89768" x="2005" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter4_f_187787_89768" x="2018" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter5_f_187787_89768" x="2031" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter6_f_187787_89768" x="2044" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter7_f_187787_89768" x="2057" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter8_f_187787_89768" x="2070" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter9_f_187787_89768" x="2082" y="321" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter10_f_187787_89768" x="1966" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter11_f_187787_89768" x="1979" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter12_f_187787_89768" x="1992" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter13_f_187787_89768" x="2005" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter14_f_187787_89768" x="2018" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter15_f_187787_89768" x="2031" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter16_f_187787_89768" x="2044" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter17_f_187787_89768" x="2057" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter18_f_187787_89768" x="2070" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<filter id="filter19_f_187787_89768" x="2082" y="1342" width="12" height="93" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.5" result="effect1_foregroundBlur_187787_89768"/>
+</filter>
+<linearGradient id="paint0_linear_187787_89768" x1="1542.5" y1="418.598" x2="1542.5" y2="719.001" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E7DB9A"/>
+<stop offset="0.895833" stop-color="#9D925B"/>
+<stop offset="1" stop-color="#948A54"/>
+</linearGradient>
+<linearGradient id="paint1_linear_187787_89768" x1="1189" y1="1329" x2="1189" y2="1604" gradientUnits="userSpaceOnUse">
+<stop offset="0.183689" stop-color="#E68536"/>
+<stop offset="1" stop-color="#793701"/>
+</linearGradient>
+<linearGradient id="paint2_linear_187787_89768" x1="3119.5" y1="1400" x2="3119.5" y2="1560" gradientUnits="userSpaceOnUse">
+<stop stop-color="#798958"/>
+<stop offset="1" stop-color="#233401"/>
+</linearGradient>
+<linearGradient id="paint3_linear_187787_89768" x1="2088" y1="480" x2="1958" y2="480" gradientUnits="userSpaceOnUse">
+<stop stop-color="#8C7D76"/>
+<stop offset="0.706619" stop-color="#FDFCFA"/>
+<stop offset="0.962358" stop-color="#F5EBEB"/>
+</linearGradient>
+<linearGradient id="paint4_linear_187787_89768" x1="1957.48" y1="519.497" x2="2101" y2="519.497" gradientUnits="userSpaceOnUse">
+<stop stop-color="#24201D"/>
+<stop offset="1" stop-color="#453F3B"/>
+</linearGradient>
+<linearGradient id="paint5_linear_187787_89768" x1="2101" y1="438" x2="1963.5" y2="438" gradientUnits="userSpaceOnUse">
+<stop offset="0.0747261" stop-color="#514941"/>
+<stop offset="1" stop-color="#B9B0AF"/>
+</linearGradient>
+<linearGradient id="paint6_linear_187787_89768" x1="2088" y1="326" x2="1958" y2="326" gradientUnits="userSpaceOnUse">
+<stop stop-color="#80776E"/>
+<stop offset="0.875" stop-color="#DED6D8"/>
+</linearGradient>
+<linearGradient id="paint7_linear_187787_89768" x1="2101.52" y1="1324.5" x2="1958" y2="1324.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#24201D"/>
+<stop offset="1" stop-color="#453F3B"/>
+</linearGradient>
+<linearGradient id="paint8_linear_187787_89768" x1="143" y1="32" x2="5.49999" y2="32" gradientUnits="userSpaceOnUse">
+<stop offset="0.0747261" stop-color="#514941"/>
+<stop offset="1" stop-color="#B9B0AF"/>
+</linearGradient>
+<linearGradient id="paint9_linear_187787_89768" x1="130" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+<stop stop-color="#80776E"/>
+<stop offset="0.875" stop-color="#DED6D8"/>
+</linearGradient>
+<linearGradient id="paint10_linear_187787_89768" x1="3540.5" y1="1010" x2="3540.5" y2="1508.61" gradientUnits="userSpaceOnUse">
+<stop stop-color="#9FC1EB"/>
+<stop offset="1" stop-color="#264C7A"/>
+</linearGradient>
+<linearGradient id="paint11_linear_187787_89768" x1="852.5" y1="989" x2="852.5" y2="1149" gradientUnits="userSpaceOnUse">
+<stop stop-color="#3D6698"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint12_linear_187787_89768" x1="1738.5" y1="794" x2="1738.5" y2="954.001" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C6BB82"/>
+<stop offset="1" stop-color="#312901"/>
+</linearGradient>
+<clipPath id="clip0_187787_89768">
+<rect width="4266" height="1763" fill="white"/>
+</clipPath>
+</defs>
+</svg>

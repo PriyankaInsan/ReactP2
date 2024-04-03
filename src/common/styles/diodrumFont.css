@@ -1,0 +1,16 @@
+@font-face{
+    font-family: "DiodrumSemiBold";
+    src: url('../../common/styles/Diodrum/Indian\ Type\ Foundry\ -\ Diodrum\ Semibold.otf');
+}
+ @font-face{
+    font-family: "DiodrumBold";
+    src: url('../../common/styles/Diodrum/Indian\ Type\ Foundry\ -\ Diodrum\ Bold.otf');
+ }
+ @font-face{
+    font-family: "DiodrumRegular";
+    src: url('../../common/styles/Diodrum/Indian\ Type\ Foundry\ -\ Diodrum.otf');
+ }
+ @font-face{
+    font-family: "DiodrumLight";
+    src: url('../../common/styles/Diodrum/Indian\ Type\ Foundry\ -\ Diodrum\ Light.otf');
+ }

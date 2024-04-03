@@ -1,0 +1,220 @@
+{
+  "data": [
+    {
+      "techName": "Pre-treatment",
+      "className": "pre-treatment",
+      "categoryID": 1,
+      "subTech": [
+        {
+          "id": "ufBtn",
+          "label": "UF",
+          "treatmentObjID":1,
+          "draggable": true,
+          "disable": false,
+          "isArrow": false,
+          "nodeData": {
+            "label": "UF",
+            "color": "purple",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "IXSD",
+          "id": "ixsBtn",
+          "treatmentObjID":2,
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "IXSD",
+            "color": "blue",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "IXOS",
+          "id": "ixosBtn",
+          "treatmentObjID":3,
+
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "IXOS",
+            "color": "green",
+            "type": "techNode"
+          }
+        }
+      ]
+    },
+    {
+      "techName": "Bulk Demineralization",
+      "className": "bulk-demineralization",
+      "categoryID": 2,
+      "subTech": [
+        {
+          "id": "roBtn",
+          "label": "RO",
+          "treatmentObjID":41,
+
+          "draggable": true,
+          "disable": true,
+          "isArrow": false,
+          "nodeData": {
+            "label": "RO",
+            "color": "green",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "CCRO",
+          "treatmentObjID":61,
+
+          "id": "ccroBtn",
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "CCRO",
+            "color": "voilet",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "ROSC",
+          "id": "roscBtn",
+          "treatmentObjID":61,
+
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "ROSC",
+            "color": "yellow",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "IXD",
+          "id": "ixdBtn",
+          "treatmentObjID":5,
+
+          "isArrow": false,
+          "draggable": true,
+          "disable": false,
+          "nodeData": {
+            "label": "IXD",
+            "color": "blue",
+            "type": "techNode"
+          }
+        }
+      ]
+    },
+    {
+      "techName": "Trace Contaminants Removal",
+      "className": "trace-contaminants-removal",
+      "categoryID": 3,
+      "subTech": [
+        {
+          "id": "ixnBtn",
+          "treatmentObjID":7,
+
+          "label": "IXN",
+          "draggable": false,
+          "disable": true,
+          "isArrow": false,
+          "nodeData": {
+            "label": "IXN",
+            "color": "green",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "IXB",
+          "treatmentObjID":8,
+
+          "id": "ccroBtn",
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "IXB",
+            "color": "voilet",
+            "type": "techNode"
+          }
+        }
+      ]
+    },
+    {
+      "techName": "Polishing",
+      "className": "polishing",
+      "categoryID": 4,
+
+      "subTech": [
+        {
+          "id": "ixmbBtn",
+          "treatmentObjID":9,
+
+          "label": "IXMB",
+          "draggable": false,
+          "disable": true,
+          "isArrow": false,
+          "nodeData": {
+            "label": "IXMB",
+            "color": "green",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "IXCP",
+          "treatmentObjID":10,
+          "id": "ixcpBtn",
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "IXCP",
+            "color": "voilet",
+            "type": "techNode"
+          }
+        }
+      ]
+    },
+    {
+      "techName": "Split & Mix Points",
+      "className": "split-mix",
+      "categoryID":5,
+      "subTech": [
+        {
+          "id": "ixmbBtn",
+          "treatmentObjID":12,
+
+          "label": "",
+          "draggable": false,
+          "disable": true,
+          "isArrow": true,
+          "nodeData": {
+            "label": "IXMB",
+            "color": "green",
+            "type": "techNode"
+          }
+        },
+        {
+          "label": "WQA",
+          "treatmentObjID":13,
+          "id": "ixcpBtn",
+          "isArrow": false,
+          "draggable": false,
+          "disable": true,
+          "nodeData": {
+            "label": "WQA",
+            "color": "voilet",
+            "type": "techNode"
+          }
+        }
+      ]
+    }
+      
+    
+  ]
+}

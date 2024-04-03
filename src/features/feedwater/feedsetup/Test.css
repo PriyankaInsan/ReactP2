@@ -1,0 +1,19 @@
+
+.charge-balance-column{
+    container-type: inline-size;
+    container-name: charge-balance-column;
+}
+@container charge-balance-column (min-width:800px) and (max-width:1060px){
+    .solutes-row{
+        /* background-color: red; */
+    }
+    .adjust-ph-column, .add-solutes-column, .adjust-solutes-column, .quick-entry-column{
+        padding: 0px 5px !important;
+        font-size: 1vw !important;
+    } 
+     /* .btn-group>button{
+        padding: 5px 8px 2px 8px !important;
+    } */
+
+}
+
